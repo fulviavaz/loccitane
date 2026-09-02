@@ -65,7 +65,7 @@ const mensagemAmigavel = (bruta, status) => {
   if (/pend[eê]ncia|pending|document/.test(texto) && /rg|comprovante|resid/.test(texto)) {
     return "O cadastro foi criado, mas ainda há pendências. Complete os dados no Escritório Virtual.";
   }
-  if (/token|unauthor|authent|credential|invalid_client|invalid_grant/.test(texto) || status === 401) {
+  if (/token|unauthor|authent|credential|invalid_client|invalid_grant|usu[aá]rio ou senha|password/.test(texto) || status === 401) {
     return "Não foi possível conectar à API agora. Tente de novo em instantes.";
   }
   if (status >= 500) {
@@ -104,6 +104,7 @@ const validarPayload = (body) => {
   if (!birthday) return { erro: "Informe a data de nascimento." };
   if (!Number.isInteger(gender) || gender < 1) return { erro: "Selecione o gênero." };
   if (!cidade) return { erro: "Informe a cidade." };
+  if (!referencia) return { erro: "Informe o ponto de referência." };
   if (!acceptTerms) return { erro: "É preciso aceitar os termos para se cadastrar." };
 
   const nascimento = new Date(birthday);
@@ -214,7 +215,7 @@ const cadastrarRevendedor = async (token, dados, geographicStructureCode) => {
   };
 
   if (dados.complemento) campos.addressComplement = dados.complemento;
-  if (dados.referencia) campos.addressReference = dados.referencia;
+  campos.addressReference = dados.referencia;
   if (geographicStructureCode) campos.geographicStructureCode = geographicStructureCode;
   if (REGISTRATION_ORIGIN) campos.registrationOrigin = REGISTRATION_ORIGIN;
 
