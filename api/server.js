@@ -6,7 +6,7 @@ const PORT = Number(process.env.PORT) || 3000;
 const BASE_URL = String(process.env.GERA_BASE_URL || "").replace(/\/$/, "");
 const TOKEN_PATH = process.env.GERA_TOKEN_PATH || "/token";
 const SELLERS_PATH = process.env.GERA_SELLERS_PATH || "/api/Public/Sellers";
-const ZIPCODE_PATH = process.env.GERA_ZIPCODE_PATH || "";
+const ZIPCODE_PATH = process.env.GERA_ZIPCODE_PATH || "/api/Public/GeographicalStructures?postalCode={cep}";
 const DOCUMENT_TYPE_CPF = process.env.GERA_DOCUMENT_TYPE_CPF || "1";
 const INDICATOR_CODE = process.env.GERA_INDICATOR_CODE || "2315";
 const REGISTRATION_ORIGIN = process.env.GERA_REGISTRATION_ORIGIN || "";
@@ -55,6 +55,9 @@ const mensagemAmigavel = (bruta, status) => {
   }
   if (/cep|zip\s*code|zipcode|postal/.test(texto)) {
     return "Não encontramos esse CEP. Confira os números e tente de novo.";
+  }
+  if (/logradouro/.test(texto) && /preench/.test(texto)) {
+    return "Não encontramos esse logradouro na Gera. Confira o CEP e o nome da rua.";
   }
   if (/cpf|document|maindocument/.test(texto)) {
     return "Confira o CPF. Os números não foram aceitos.";
@@ -165,34 +168,54 @@ const obterToken = async () => {
   return token;
 };
 
-const extrairCodigoGeografico = (corpo) => {
-  if (!corpo || typeof corpo !== "object") return "";
-  const candidatos = [
-    corpo.geographicStructureCode,
-    corpo.GeographicStructureCode,
-    corpo.code,
-    corpo.id,
-    corpo.data?.geographicStructureCode,
-    corpo.data?.code,
-    corpo.data?.id,
-    Array.isArray(corpo) ? corpo[0]?.geographicStructureCode || corpo[0]?.code || corpo[0]?.id : ""
-  ];
-  const codigo = candidatos.find((valor) => valor !== undefined && valor !== null && valor !== "");
-  return codigo === undefined ? "" : String(codigo);
+const normalizarTexto = (valor) => String(valor || "")
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .toLowerCase()
+  .replace(/\./g, "")
+  .replace(/\s+/g, " ")
+  .trim();
+
+const listarEstruturas = (corpo) => {
+  if (Array.isArray(corpo)) return corpo;
+  if (Array.isArray(corpo?.data)) return corpo.data;
+  if (Array.isArray(corpo?.items)) return corpo.items;
+  if (Array.isArray(corpo?.results)) return corpo.results;
+  return corpo && typeof corpo === "object" ? [corpo] : [];
 };
 
-const resolverEstruturaGeografica = async (token, zipCode) => {
+const escolherCodigoLogradouro = (corpo, logradouro) => {
+  const itens = listarEstruturas(corpo);
+  const folhas = itens.filter((item) => (
+    item?.isLeaf
+    || Number(item?.level?.code) === 4
+    || /logradouro/i.test(String(item?.level?.name || ""))
+  ));
+  const candidatos = folhas.length ? folhas : itens;
+  const alvo = normalizarTexto(logradouro);
+  const porNome = alvo
+    ? candidatos.find((item) => {
+      const nome = normalizarTexto(item?.name);
+      return nome && (nome === alvo || nome.includes(alvo) || alvo.includes(nome));
+    })
+    : null;
+  const escolhido = porNome || folhas[0] || itens.find((item) => item?.isLeaf) || itens[itens.length - 1];
+  const codigo = escolhido?.code ?? escolhido?.geographicStructureCode ?? escolhido?.id;
+  return codigo === undefined || codigo === null || codigo === "" ? "" : String(codigo);
+};
+
+const resolverEstruturaGeografica = async (token, zipCode, logradouro) => {
   if (!ZIPCODE_PATH) return "";
   const caminho = ZIPCODE_PATH.includes("{cep}") || ZIPCODE_PATH.includes("{zipCode}")
     ? ZIPCODE_PATH.replace("{cep}", zipCode).replace("{zipCode}", zipCode)
-    : `${ZIPCODE_PATH}${ZIPCODE_PATH.includes("?") ? "&" : "?"}zipCode=${zipCode}`;
+    : `${ZIPCODE_PATH}${ZIPCODE_PATH.includes("?") ? "&" : "?"}postalCode=${zipCode}`;
 
   const resposta = await fetch(joinUrl(BASE_URL, caminho), {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!resposta.ok) return "";
   const corpo = await lerJsonSeguro(resposta);
-  return extrairCodigoGeografico(corpo);
+  return escolherCodigoLogradouro(corpo, logradouro);
 };
 
 const cadastrarRevendedor = async (token, dados, geographicStructureCode) => {
@@ -528,7 +551,11 @@ app.post("/api/cadastro", async (req, res) => {
 
     let geographicStructureCode = "";
     try {
-      geographicStructureCode = await resolverEstruturaGeografica(token, validacao.dados.zipCode);
+      geographicStructureCode = await resolverEstruturaGeografica(
+        token,
+        validacao.dados.zipCode,
+        validacao.dados.rua
+      );
     } catch {
       geographicStructureCode = "";
     }

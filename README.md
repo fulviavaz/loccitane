@@ -79,6 +79,7 @@ Copie `api/.env.example` para `api/.env` **no servidor**. Esse arquivo **não va
 | `GERA_USERNAME` | código da líder / indicante (`2315`) |
 | `GERA_PASSWORD` | senha do integrador |
 | `GERA_INDICATOR_CODE` | `2315` |
+| `GERA_ZIPCODE_PATH` | `/api/Public/GeographicalStructures?postalCode={cep}` |
 | `INDICO_API_BASE` | API do OTP Indico (staging: `https://lp-collector-api-670020683031.us-east1.run.app`) |
 | `INDICO_DB_ID` | UUID do destino (`X-Db-ID`) |
 | `INDICO_OTP_PURPOSE` | `registration` |
