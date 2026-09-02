@@ -2165,7 +2165,7 @@
     };
 
     const enviarCodigo = async () => {
-      const captchaToken = await obterCaptcha("otp_generate");
+      const captchaToken = await obterCaptcha("lead");
       const { resposta, data } = await chamarApi("/api/otp/gerar", {
         email: payloadAtual.email,
         captcha_token: captchaToken
