@@ -1,0 +1,2421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Transforme Brasilidade em renda extra — Revenda L'Occitane au Brésil</title>
+  <meta name="description" content="Seja uma revendedora L'Occitane au Brésil. Venda pelo preço da revista e fique com até 35% de renda extra em cada venda, com pagamento em até 10x e uma líder para te apoiar pelo WhatsApp." />
+  <link rel="preload" href="assets/fonts/ernest-emily.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/josefin-sans.woff2" as="font" type="font/woff2" crossorigin />
+  <style>
+    @font-face {
+      font-family: "Ernest Emily";
+      src: url("assets/fonts/ernest-emily.woff2") format("woff2");
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Ernest Emily Caps";
+      src: url("assets/fonts/ernest-emily-caps.woff2") format("woff2");
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "Josefin Sans";
+      src: url("assets/fonts/josefin-sans-ext.woff2") format("woff2");
+      font-weight: 100 700;
+      font-display: swap;
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    @font-face {
+      font-family: "Josefin Sans";
+      src: url("assets/fonts/josefin-sans.woff2") format("woff2");
+      font-weight: 100 700;
+      font-display: swap;
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+
+    :root {
+      --red: #C02031;
+      --red-deep: #96121F;
+      --cream: #F5E2CF;
+      --cream-soft: #FBF1E6;
+      --orange: #FF6B00;
+      --pink: #EC5F7E;
+      --pink-soft: #FBE3E9;
+      --ink: #2B1A13;
+      --muted: #6E564A;
+      --white: #FFFFFF;
+      --line: rgba(43, 26, 19, 0.12);
+      --pad: clamp(1.25rem, 5vw, 3.5rem);
+      --max: 1160px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --shadow-card: 0 20px 45px rgba(88, 40, 25, 0.1);
+      --shadow-float: 0 26px 60px rgba(88, 30, 20, 0.22);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Josefin Sans", "Segoe UI", sans-serif;
+      background: var(--cream-soft);
+      color: var(--ink);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    img { display: block; max-width: 100%; height: auto; }
+    a { color: inherit; text-decoration: none; }
+    button, input, select { font: inherit; color: inherit; }
+    button { border: 0; background: none; cursor: pointer; }
+
+    .wrap {
+      width: min(var(--max), calc(100% - 2 * var(--pad)));
+      margin-inline: auto;
+    }
+    .script {
+      font-family: "Ernest Emily", "Segoe Script", cursive;
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: 0.01em;
+    }
+    .eyebrow {
+      font-family: "Ernest Emily Caps", "Josefin Sans", sans-serif;
+      font-size: clamp(2rem, 3vw, 2.45rem);
+      line-height: 1.15;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-size: clamp(2.3rem, 5vw, 3.5rem);
+      color: var(--red);
+      margin-bottom: 0.55rem;
+    }
+    .section-sub {
+      color: var(--muted);
+      font-size: clamp(1rem, 1.6vw, 1.1rem);
+      max-width: 46ch;
+    }
+    .center { text-align: center; }
+    .center .section-sub { margin-inline: auto; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 3.25rem;
+      padding: 0.9rem 1.9rem;
+      border-radius: 999px;
+      background: var(--red);
+      color: var(--white);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      box-shadow: 0 12px 26px rgba(192, 32, 49, 0.28);
+      transition: background 0.25s var(--ease), transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+    .btn:hover {
+      background: var(--red-deep);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px rgba(150, 18, 31, 0.32);
+    }
+    .btn--cream {
+      background: var(--cream);
+      color: var(--red);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
+    }
+    .btn--cream:hover { background: var(--white); color: var(--red-deep); }
+    .btn--ghost {
+      background: transparent;
+      color: var(--red);
+      box-shadow: inset 0 0 0 1.5px currentColor;
+    }
+    .btn--ghost:hover { background: rgba(192, 32, 49, 0.06); color: var(--red-deep); }
+
+    /* ——— Header ——— */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background: rgba(251, 241, 230, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    .header__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      min-height: 74px;
+    }
+    .header__logo img { height: 40px; }
+    .header__nav {
+      display: flex;
+      gap: 1.6rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .header__nav a { transition: color 0.2s; }
+    .header__nav a:hover { color: var(--red); }
+    .header .btn {
+      min-height: 2.7rem;
+      padding: 0.55rem 1.35rem;
+      font-size: 0.88rem;
+    }
+
+    /* ——— Hero ——— */
+    .hero {
+      position: relative;
+      background: linear-gradient(150deg, #C02031 0%, #A8182A 55%, #8E1522 100%);
+      color: var(--white);
+      padding: clamp(2.5rem, 6vw, 4.5rem) 0 clamp(4rem, 8vw, 6rem);
+      overflow: hidden;
+    }
+    .hero__glow {
+      position: absolute;
+      width: 60vw;
+      height: 60vw;
+      max-width: 700px;
+      max-height: 700px;
+      right: -18%;
+      top: -25%;
+      background: radial-gradient(circle, rgba(255, 107, 0, 0.5), transparent 62%);
+      pointer-events: none;
+    }
+    .hero__photo {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: min(58%, 760px);
+      pointer-events: none;
+      user-select: none;
+    }
+    .hero__photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 18% 16%;
+      opacity: 0.96;
+      mix-blend-mode: soft-light;
+      -webkit-mask-image: linear-gradient(100deg, rgba(0, 0, 0, 0.95) 10%, rgba(0, 0, 0, 0.5) 55%, transparent 98%);
+      mask-image: linear-gradient(100deg, rgba(0, 0, 0, 0.95) 10%, rgba(0, 0, 0, 0.5) 55%, transparent 88%);
+    }
+    .hero__photo::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(85deg, rgba(150, 18, 31, 0.58), rgba(150, 18, 31, 0.2) 60%, transparent);
+    }
+    .hero__inner {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.18fr 0.82fr;
+      gap: clamp(1.75rem, 4vw, 3.5rem);
+      align-items: center;
+    }
+    .hero .eyebrow { color: #FFD9C2; }
+    .hero h1 {
+      margin-bottom: 1.1rem;
+    }
+    .hero h1 .script {
+      display: block;
+      font-weight: 400;
+      font-size: clamp(2.9rem, 6.2vw, 5.4rem);
+      line-height: 0.95;
+      color: #FFE2CE;
+      margin-bottom: 0.5rem;
+    }
+    .hero__sub {
+      display: block;
+      font-size: clamp(1.8rem, 2.7vw, 2.5rem);
+      font-weight: 500;
+      line-height: 1.3;
+      max-width: 22ch;
+      text-wrap: balance;
+    }
+    .hero__pitch {
+      font-size: clamp(1.02rem, 1.7vw, 1.18rem);
+      font-weight: 500;
+      line-height: 1.55;
+      max-width: 42ch;
+      color: #FFE2CE;
+      margin-bottom: 0.85rem;
+      text-wrap: pretty;
+    }
+    .hero__lead {
+      font-size: clamp(1rem, 1.55vw, 1.08rem);
+      line-height: 1.6;
+      max-width: 46ch;
+      color: rgba(255, 255, 255, 0.88);
+      margin-bottom: 1.75rem;
+      text-wrap: pretty;
+    }
+    .hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.9rem 1.25rem;
+      margin-bottom: 1.6rem;
+    }
+    .proof {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 0.82rem;
+      line-height: 1.3;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    .proof__avatars { display: flex; }
+    .proof__avatars img {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      margin-left: -10px;
+    }
+    .proof__avatars img:first-child { margin-left: 0; }
+    .proof strong { display: block; font-size: 0.95rem; }
+
+    .badge-vip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 1rem 0.5rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+      font-size: 0.8rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .badge-vip img {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      flex-shrink: 0;
+    }
+    .badge-vip--light {
+      background: var(--white);
+      box-shadow: var(--shadow-card);
+      color: var(--ink);
+    }
+    .badge-vip--light strong { color: var(--red); }
+
+    .brush {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      width: 100%;
+      height: clamp(28px, 4vw, 52px);
+      display: block;
+      color: var(--cream-soft);
+    }
+
+    /* ——— Cadastro ——— */
+    .cadastro {
+      position: relative;
+      background: var(--cream-soft);
+      padding: clamp(2.75rem, 6vw, 4.5rem) 0 clamp(3rem, 7vw, 5rem);
+    }
+    .cadastro__grid {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: clamp(1.75rem, 4vw, 3.5rem);
+      align-items: start;
+    }
+    .cadastro__copy .section-title { margin-bottom: 0.75rem; }
+    .cadastro__copy p {
+      color: var(--muted);
+      max-width: 34ch;
+      margin-bottom: 1.4rem;
+    }
+    .perks {
+      display: grid;
+      gap: 0.85rem;
+      margin-bottom: 1.6rem;
+    }
+    .perks li {
+      list-style: none;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.75rem;
+      align-items: start;
+      font-weight: 600;
+      font-size: 0.98rem;
+    }
+    .perks svg {
+      width: 22px;
+      height: 22px;
+      color: var(--red);
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+    .perks span {
+      display: block;
+      font-weight: 400;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    /* ——— Destaque da líder ——— */
+    .lider {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(1.35rem, 3vw, 1.85rem);
+      border-radius: 24px 24px 24px 6px;
+      background: linear-gradient(140deg, #FFF3E8, var(--pink-soft) 70%);
+      box-shadow: var(--shadow-card), inset 0 0 0 1.5px rgba(192, 32, 49, 0.14);
+    }
+    .lider::after {
+      content: "";
+      position: absolute;
+      right: -60px;
+      top: -60px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 107, 0, 0.16), transparent 68%);
+      pointer-events: none;
+    }
+    .lider__head {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      margin-bottom: 0.85rem;
+    }
+    .lider__photo {
+      position: relative;
+      flex-shrink: 0;
+      width: 72px;
+      height: 72px;
+    }
+    .lider__photo img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 10px 22px rgba(88, 40, 25, 0.22);
+      border: 3px solid var(--white);
+    }
+    .lider__photo svg {
+      position: absolute;
+      right: -4px;
+      bottom: -2px;
+      width: 26px;
+      height: 26px;
+      padding: 4px;
+      border-radius: 50%;
+      background: #25D366;
+      color: var(--white);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+    }
+    .lider__tag {
+      display: inline-block;
+      margin-bottom: 0.3rem;
+      font-family: "Ernest Emily Caps", "Josefin Sans", sans-serif;
+      font-size: 1.7rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--orange);
+    }
+    .lider h3 {
+      font-size: clamp(1.5rem, 2.6vw, 1.95rem);
+      line-height: 1.05;
+      color: var(--red);
+    }
+    .lider p {
+      position: relative;
+      max-width: 48ch;
+      margin-bottom: 0;
+      font-size: 0.97rem;
+      color: var(--muted);
+    }
+    .lider__link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.9rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--red);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .lider__link:hover { color: var(--red-deep); }
+
+    .form {
+      position: relative;
+      background: var(--white);
+      border-radius: 22px;
+      padding: clamp(1.5rem, 3vw, 2.25rem);
+      box-shadow: 0 24px 55px rgba(88, 40, 25, 0.14);
+    }
+    .form__tag {
+      position: absolute;
+      top: -0.9rem;
+      left: clamp(1.5rem, 3vw, 2.25rem);
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+      background: var(--orange);
+      color: var(--white);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .form h3 {
+      font-size: clamp(1.5rem, 2.6vw, 1.95rem);
+      color: var(--red);
+      margin: 0.4rem 0 0.35rem;
+    }
+    .form > p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+    .form__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 1rem;
+    }
+    .form label {
+      display: grid;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+    }
+    .form label.full { grid-column: 1 / -1; }
+    .form input,
+    .form select {
+      width: 100%;
+      min-height: 3rem;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid #E7D8C8;
+      border-radius: 12px;
+      background: #FFFCF9;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form input::placeholder { color: #B9A597; }
+    .form input:focus,
+    .form select:focus {
+      outline: none;
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(192, 32, 49, 0.12);
+    }
+    .form select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E564A' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.85rem center;
+      background-size: 18px;
+      padding-right: 2.5rem;
+    }
+    .form label em {
+      font-style: normal;
+      font-weight: 500;
+      color: #B9A597;
+    }
+    .form__sep {
+      grid-column: 1 / -1;
+      margin: 0.25rem 0 1rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--red);
+    }
+    .form__check {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      margin-bottom: 1rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .form__check input {
+      width: 1.15rem;
+      min-height: 1.15rem;
+      margin-top: 0.15rem;
+      padding: 0;
+      accent-color: var(--red);
+      flex-shrink: 0;
+    }
+    .form .btn { width: 100%; margin-top: 0.35rem; }
+    .form .btn:disabled {
+      opacity: 0.72;
+      cursor: wait;
+      transform: none;
+    }
+    .form__status {
+      display: none;
+      margin: 0 0 1rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 12px;
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+    .form__status.is-visible { display: block; }
+    .form__status.is-error {
+      background: #FDECEE;
+      color: #96121F;
+    }
+    .form__status.is-success {
+      background: #E8F6EE;
+      color: #1F6B3A;
+    }
+    .form__step { display: none; }
+    .form[data-step="dados"] .form__step--dados,
+    .form[data-step="existe"] .form__step--existe,
+    .form[data-step="codigo"] .form__step--codigo,
+    .form[data-step="sucesso"] .form__step--sucesso { display: block; }
+    .form__actions {
+      display: grid;
+      gap: 0.65rem;
+    }
+    .form__actions .btn--ghost {
+      background: transparent;
+      color: var(--red);
+      box-shadow: none;
+      border: 1.5px solid #E7D8C8;
+    }
+    .form__actions .btn--ghost:hover {
+      background: #FFF6F0;
+      transform: none;
+    }
+    .form__credenciais {
+      display: grid;
+      gap: 0.75rem;
+      margin: 1rem 0 1.25rem;
+    }
+    .form__cred {
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      background: #FFF6F0;
+      border: 1.5px solid #E7D8C8;
+    }
+    .form__cred span {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+    .form__cred strong {
+      font-size: 1.05rem;
+      word-break: break-all;
+    }
+    .form__note {
+      margin-top: 0.9rem;
+      font-size: 0.76rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.45;
+    }
+    .form__note a {
+      color: var(--red);
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* ——— Passos ——— */
+    .passos {
+      background: var(--white);
+      padding: clamp(3rem, 7vw, 4.75rem) 0;
+    }
+    .passos__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(1.25rem, 3vw, 2rem);
+      margin-top: clamp(1.75rem, 4vw, 2.75rem);
+    }
+    .passo {
+      position: relative;
+      padding: 2rem 1.5rem 1.75rem;
+      background: var(--cream-soft);
+      border-radius: 26px 26px 26px 6px;
+      transition: transform 0.3s var(--ease);
+    }
+    .passo:hover { transform: translateY(-4px); }
+    .passo__n {
+      position: absolute;
+      top: -0.85rem;
+      left: 1.5rem;
+      width: 2.4rem;
+      height: 2.4rem;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--red);
+      color: var(--white);
+      font-size: 1.05rem;
+      font-weight: 700;
+      box-shadow: 0 8px 18px rgba(192, 32, 49, 0.3);
+    }
+    .passo__icon {
+      width: 46px;
+      height: 46px;
+      color: var(--orange);
+      margin-bottom: 0.85rem;
+    }
+    .passo h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .passo p { color: var(--muted); font-size: 0.97rem; }
+
+    /* ——— Régua de crescimento ——— */
+    .regua {
+      background: var(--red);
+      color: var(--white);
+      padding: clamp(3rem, 7vw, 4.75rem) 0;
+    }
+    .regua .section-title { color: var(--white); }
+    .regua .eyebrow { color: #FFD9C2; }
+    .regua .section-sub { color: rgba(255, 255, 255, 0.88); }
+    .regua__card {
+      margin-top: clamp(1.75rem, 4vw, 2.5rem);
+      padding: clamp(1.5rem, 3.5vw, 2.5rem);
+      background: var(--cream);
+      border-radius: 28px;
+      box-shadow: 0 22px 50px rgba(80, 10, 20, 0.24);
+    }
+    .regua__grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(1.25rem, 2.5vw, 2rem);
+    }
+    .nivel {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      text-align: center;
+    }
+    .nivel__top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.7rem;
+    }
+    .nivel__mark {
+      width: 58px;
+      height: 58px;
+      flex-shrink: 0;
+    }
+    .nivel__label { text-align: left; }
+    .nivel__pct {
+      display: block;
+      font-size: clamp(1.6rem, 2.6vw, 2rem);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--red);
+    }
+    .nivel__name {
+      display: block;
+      font-size: clamp(1.35rem, 2.2vw, 1.7rem);
+      line-height: 1;
+      margin-top: 0.1rem;
+      color: var(--tier);
+    }
+    .nivel__range {
+      position: relative;
+      padding-top: 0.85rem;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+    .nivel__range::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(170px, 90%);
+      height: 2px;
+      background: var(--red);
+      border-radius: 2px;
+    }
+    .nivel__range strong { color: var(--red); font-weight: 700; }
+    .regua__note {
+      margin-top: clamp(1.25rem, 3vw, 1.75rem);
+      text-align: center;
+      font-size: 0.88rem;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    /* ——— Calculadora compacta no hero ——— */
+    .calc-hero {
+      padding: clamp(1.1rem, 2.2vw, 1.5rem);
+      background: var(--white);
+      color: var(--ink);
+      border-radius: 24px;
+      box-shadow: var(--shadow-float);
+    }
+    .calc-hero__head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding-bottom: 0.85rem;
+      margin-bottom: 0.9rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .calc-hero .eyebrow {
+      margin-bottom: 0.15rem;
+      font-size: 1.7rem;
+      letter-spacing: 0.06em;
+      color: var(--orange);
+    }
+    .calc-hero .nivel__label { text-align: left; }
+    .calc-hero__title {
+      font-size: clamp(1.55rem, 2.6vw, 1.95rem);
+      color: var(--red);
+    }
+    .calc-hero .nivel__mark { width: 44px; height: 44px; }
+    .calc-hero .nivel__pct { font-size: 1.3rem; }
+    .calc-hero .nivel__name { font-size: 1.1rem; }
+    .calc-hero .btn {
+      width: 100%;
+      min-height: 3rem;
+      margin-top: 1rem;
+    }
+    .calc-hero__note {
+      margin-top: 0.6rem;
+      text-align: center;
+      font-size: 0.72rem;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    .calc__field {
+      display: grid;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--muted);
+    }
+    .calc__money {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.85rem;
+      border: 1.5px solid #E7D8C8;
+      border-radius: 14px;
+      background: #FFFCF9;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .calc__money:focus-within {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(192, 32, 49, 0.12);
+    }
+    .calc__money > span {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .calc__money input {
+      width: 100%;
+      border: 0;
+      background: none;
+      font-size: clamp(1.45rem, 2.6vw, 1.8rem);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--red);
+    }
+    .calc__money input:focus { outline: none; }
+    .calc__range {
+      width: 100%;
+      margin: 0.85rem 0 0.9rem;
+      accent-color: var(--red);
+      cursor: pointer;
+    }
+    .calc__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .calc__chip {
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      background: var(--cream-soft);
+      box-shadow: inset 0 0 0 1.5px var(--line);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      transition: background 0.2s var(--ease), color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+    .calc__chip:hover { color: var(--red); box-shadow: inset 0 0 0 1.5px rgba(192, 32, 49, 0.4); }
+    .calc__chip.is-active {
+      background: var(--red);
+      color: var(--white);
+      box-shadow: 0 10px 22px rgba(192, 32, 49, 0.24);
+    }
+    .calc__tier {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-shrink: 0;
+    }
+    .calc__lines {
+      display: grid;
+      gap: 0.3rem;
+      margin-top: 0.7rem;
+    }
+    .calc__lines > div {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      font-size: 0.86rem;
+    }
+    .calc__lines dt { color: var(--muted); }
+    .calc__lines dd { font-weight: 700; }
+    .calc__profit {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1rem;
+      padding: 0.7rem 1rem;
+      background: var(--cream-soft);
+      border-radius: 16px;
+    }
+    .calc__profit > span {
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .calc__profit strong {
+      font-size: clamp(1.6rem, 3vw, 2.05rem);
+      line-height: 1;
+      color: var(--red);
+    }
+    .calc__next { margin-top: 0.9rem; }
+    .calc__bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+    }
+    .calc__bar span {
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(43, 26, 19, 0.12);
+      transition: background 0.3s var(--ease);
+    }
+    .calc__bar span.is-on { background: var(--red); }
+    .calc__steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin-top: 0.35rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-align: center;
+      color: var(--muted);
+    }
+    .calc__steps span.is-on { color: var(--red); }
+    .calc__next p {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    .calc__next strong { color: var(--red); }
+
+    /* ——— Produtos ——— */
+    .produtos {
+      background: var(--pink-soft);
+      padding: clamp(3rem, 7vw, 4.75rem) 0;
+    }
+    .produtos__grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(0.75rem, 1.6vw, 1.1rem);
+      margin-top: clamp(1.75rem, 4vw, 2.5rem);
+    }
+    .produto {
+      position: relative;
+      overflow: hidden;
+      border-radius: 20px;
+      aspect-ratio: 3 / 4;
+      box-shadow: var(--shadow-card);
+    }
+    .produto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 1s var(--ease);
+    }
+    .produto:hover img { transform: scale(1.06); }
+    .produto::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(30, 8, 5, 0.6), transparent 55%);
+    }
+    .produto__name {
+      position: absolute;
+      left: 1rem;
+      right: 1rem;
+      bottom: 0.85rem;
+      z-index: 1;
+      color: var(--white);
+      font-size: 1.7rem;
+      text-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ——— Kit ——— */
+    .kit {
+      background: var(--cream);
+      padding: clamp(3rem, 7vw, 4.75rem) 0;
+    }
+    .kit__head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem 2rem;
+      margin-bottom: clamp(1.5rem, 3.5vw, 2.25rem);
+    }
+    .kit__head .section-sub { max-width: 40ch; }
+    .kit__head .btn--ghost { flex-shrink: 0; }
+    .kit__grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(0.75rem, 1.6vw, 1.1rem);
+    }
+    .kit__item {
+      background: var(--white);
+      border-radius: 18px;
+      padding: 0.75rem 0.75rem 1rem;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+    }
+    .kit__item img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 0.65rem;
+    }
+    .kit__item h3 {
+      font-size: 0.92rem;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 0.2rem;
+    }
+    .kit__item p {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--red);
+    }
+    .kit__foot {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding: 1.15rem 1.4rem;
+      background: var(--white);
+      border-radius: 18px;
+      box-shadow: var(--shadow-card);
+    }
+    .kit__foot p { font-size: 0.92rem; color: var(--muted); max-width: 46ch; }
+    .kit__foot strong { color: var(--ink); }
+
+    /* ——— Depoimentos ——— */
+    .depos {
+      position: relative;
+      background: var(--red);
+      color: var(--white);
+      padding: clamp(3rem, 7vw, 4.75rem) 0;
+      overflow: hidden;
+    }
+    .depos .section-title { color: var(--white); }
+    .depos .eyebrow { color: #FFD9C2; }
+    .depos__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(0.9rem, 2vw, 1.4rem);
+      margin-top: clamp(1.75rem, 4vw, 2.5rem);
+    }
+    .depo {
+      background: var(--white);
+      color: var(--ink);
+      border-radius: 20px;
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      box-shadow: 0 18px 40px rgba(80, 10, 20, 0.22);
+    }
+    .depo__stars { color: var(--orange); font-size: 0.95rem; letter-spacing: 0.1em; }
+    .depo p { font-size: 0.95rem; color: var(--muted); flex: 1; }
+    .depo__who {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--line);
+    }
+    .depo__who img {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .depo__who strong { display: block; font-size: 0.92rem; }
+    .depo__who span { font-size: 0.78rem; color: var(--muted); }
+
+    /* ——— FAQ ——— */
+    .faq {
+      background: var(--cream-soft);
+      padding: clamp(3rem, 7vw, 4.75rem) 0;
+    }
+    .faq__grid {
+      display: grid;
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: clamp(1.5rem, 4vw, 3rem);
+      align-items: start;
+    }
+    .faq__aside .section-title { margin-bottom: 1.1rem; }
+    .faq details {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 1.05rem 1.25rem;
+      margin-bottom: 0.7rem;
+      box-shadow: 0 8px 20px rgba(88, 40, 25, 0.05);
+    }
+    .faq details.vip {
+      background: linear-gradient(135deg, #FFF3E8, var(--pink-soft));
+      box-shadow: inset 0 0 0 1.5px rgba(192, 32, 49, 0.16);
+    }
+    .faq summary {
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after {
+      content: "+";
+      color: var(--red);
+      font-size: 1.4rem;
+      line-height: 1;
+      transition: transform 0.25s var(--ease);
+    }
+    .faq details[open] summary::after { transform: rotate(45deg); }
+    .faq details p {
+      margin-top: 0.65rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .faq details p a {
+      color: var(--red);
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* ——— CTA final ——— */
+    .final {
+      background: linear-gradient(115deg, var(--orange), var(--red) 65%);
+      color: var(--white);
+      padding: clamp(2.75rem, 6vw, 4rem) 0;
+      text-align: center;
+    }
+    .final h2 {
+      font-size: clamp(2.4rem, 5.5vw, 3.8rem);
+      margin-bottom: 0.5rem;
+    }
+    .final p {
+      max-width: 44ch;
+      margin: 0 auto 1.5rem;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    /* ——— Footer ——— */
+    .footer {
+      background: var(--white);
+      padding: 2rem 0;
+      border-top: 1px solid var(--line);
+    }
+    .footer__inner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .footer__logo img { height: 38px; }
+    .footer__links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem 1.4rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .footer__links a:hover { color: var(--red); }
+    .footer__copy {
+      width: 100%;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    /* ——— Sticky CTA (mobile) ——— */
+    .sticky-cta {
+      display: none;
+      position: fixed;
+      left: 1rem;
+      right: 1rem;
+      bottom: calc(0.9rem + env(safe-area-inset-bottom));
+      z-index: 70;
+      min-height: 3.4rem;
+      border-radius: 999px;
+      background: var(--red);
+      color: var(--white);
+      font-size: 1.02rem;
+      font-weight: 700;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 16px 34px rgba(150, 18, 31, 0.42);
+      transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+    }
+    .sticky-cta.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(120%);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+    .reveal.is-in { opacity: 1; transform: none; }
+
+    @media (max-width: 1024px) {
+      .produtos__grid,
+      .kit__grid,
+      .regua__grid { grid-template-columns: repeat(2, 1fr); }
+      .regua__grid { gap: 1.75rem 1.25rem; }
+    }
+
+    @media (max-width: 900px) {
+      .header__nav { display: none; }
+      .hero { padding-bottom: clamp(3rem, 9vw, 4.5rem); }
+      .hero__inner { grid-template-columns: 1fr; }
+      .hero h1 { max-width: 24ch; }
+      .calc-hero { max-width: 480px; }
+      .hero__photo { width: 100%; }
+      .hero__photo img {
+        opacity: 0.3;
+        object-position: 50% 14%;
+        -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 62%);
+        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 62%);
+      }
+      .hero__photo::after { background: linear-gradient(to bottom, rgba(150, 18, 31, 0.45), transparent 70%); }
+      .cadastro__grid,
+      .passos__grid,
+      .depos__grid,
+      .faq__grid { grid-template-columns: 1fr; }
+      .sticky-cta { display: flex; }
+      body { padding-bottom: 5rem; }
+    }
+
+    @media (max-width: 560px) {
+      .form__grid { grid-template-columns: 1fr; }
+      .produtos__grid,
+      .kit__grid { grid-template-columns: 1fr 1fr; }
+      .produto__name { font-size: 1.35rem; }
+      .nivel__top { flex-direction: column; gap: 0.4rem; }
+      .nivel__label { text-align: center; }
+      .nivel__mark { width: 48px; height: 48px; }
+      .nivel__range { font-size: 0.88rem; }
+      .header .btn { padding: 0.5rem 1rem; font-size: 0.8rem; }
+      .header__logo img { height: 34px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="mark-tier" viewBox="0 0 100 100">
+      <clipPath id="mark-tier-clip"><circle cx="50" cy="50" r="50" /></clipPath>
+      <g clip-path="url(#mark-tier-clip)">
+        <rect width="100" height="100" fill="currentColor" />
+        <g fill="#FBF1E6">
+          <path d="M-4 106C4 66 14 30 28-6h13C29 30 18 66 12 106z" />
+          <path d="M24 106C32 64 44 28 58-6h10C54 28 42 64 36 106z" />
+          <path d="M52 106C60 66 72 30 86-6h7C79 30 68 66 62 106z" />
+          <path d="M78 106C86 68 96 36 108-6h5C101 36 92 68 88 106z" />
+        </g>
+      </g>
+    </symbol>
+  </svg>
+
+  <header class="header">
+    <div class="wrap header__inner">
+      <a class="header__logo" href="#topo" aria-label="L'Occitane au Brésil">
+        <img src="assets/web/logo-branco-transparente.png" alt="L'Occitane au Brésil" />
+      </a>
+      <nav class="header__nav" aria-label="Navegação principal">
+        <a href="#cadastro">Cadastro</a>
+        <a href="#passos">Como funciona</a>
+        <a href="#crescimento">Quanto ganho</a>
+        <a href="#produtos">Produtos</a>
+        <a href="#depoimentos">Quem já vende</a>
+        <a href="#duvidas">Perguntas</a>
+      </nav>
+      <a class="btn" href="#cadastro">Quero começar a vender</a>
+    </div>
+  </header>
+
+  <main id="topo">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__photo" aria-hidden="true">
+        <img src="assets/web/hero-revendedora.jpg" alt="" />
+      </div>
+      <div class="hero__glow" aria-hidden="true"></div>
+      <div class="wrap hero__inner">
+        <div class="hero__content">
+          <!--<p class="eyebrow">Renda extra de verdade</p>-->
+          <h1 id="hero-title">
+            <span class="script">Transforme Brasilidade</span>
+            <span class="hero__sub">em renda extra</span>
+          </h1>
+          <p class="hero__pitch">Seja uma revendedora L'Occitane au Brésil. Empreenda com liberdade vendendo uma marca que dispensa apresentações.</p>
+          <p class="hero__lead">Você vende e fica com até 35% de cada venda.</p>
+          <div class="hero__actions">
+            <a class="btn btn--cream" href="#cadastro">Quero começar a vender</a>
+            <div class="proof">
+              <div class="proof__avatars" aria-hidden="true">
+                <img src="assets/web/depoimento-1.jpg" alt="" />
+                <img src="assets/web/depoimento-2.jpg" alt="" />
+                <img src="assets/web/depoimento-3.jpg" alt="" />
+              </div>
+              <div><strong>+20.000 revendedoras</strong> já vendem com a gente</div>
+            </div>
+          </div>
+          <!--<span class="badge-vip">
+            <img src="assets/web/lider-rosto.jpg" alt="" />
+            Uma líder te ajuda pelo WhatsApp
+          </span>-->
+        </div>
+
+        <aside class="calc-hero" id="calculadora" aria-labelledby="calc-title">
+          <div class="calc-hero__head">
+            <div>
+              <!--<p class="eyebrow">Faça a conta</p>-->
+              <h2 class="script calc-hero__title" id="calc-title">Quanto eu ganho?</h2>
+            </div>
+            <div class="calc__tier">
+              <svg class="nivel__mark" id="calc-mark" viewBox="0 0 100 100" style="color: #C87941" role="img" aria-label="Selo do seu nível">
+                <use href="#mark-tier" />
+              </svg>
+              <div class="nivel__label">
+                <span class="nivel__pct" id="calc-pct">20%</span>
+                <span class="script nivel__name" id="calc-nome">bronze</span>
+              </div>
+            </div>
+          </div>
+
+          <label class="calc__field" for="calc-valor">Quanto você quer investir para vender no próximo ano?
+            <span class="calc__money">
+              <span aria-hidden="true">R$</span>
+              <input id="calc-valor" name="calc-valor" type="text" inputmode="numeric" value="360" aria-describedby="calc-hint" />
+            </span>
+          </label>
+          <input class="calc__range" id="calc-range" type="range" min="360" max="20000" step="20" value="360" aria-label="Valor do pedido em reais" />
+          <div class="calc__chips">
+            <button class="calc__chip" type="button" data-valor="360">R$ 360</button>
+            <button class="calc__chip" type="button" data-valor="2000">R$ 2.000</button>
+            <button class="calc__chip" type="button" data-valor="6000">R$ 6.000</button>
+            <button class="calc__chip" type="button" data-valor="20000">R$ 20.000</button>
+          </div>
+
+          <div class="calc__profit">
+            <span>Sua renda extra</span>
+            <strong id="calc-lucro">R$ 90</strong>
+          </div>
+
+          <dl class="calc__lines">
+            <div>
+              <dt>Quanto você investe</dt>
+              <dd id="calc-paga">R$ 360</dd>
+            </div>
+            <div>
+              <dt>Você vende por</dt>
+              <dd id="calc-vende">R$ 450</dd>
+            </div>
+          </dl>
+
+          <div class="calc__next">
+            <div class="calc__bar" id="calc-bar" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="calc__steps" id="calc-steps" aria-hidden="true">
+              <span>20%</span><span>25%</span><span>30%</span><span>35%</span>
+            </div>
+            <p id="calc-msg" role="status">Faltam <strong>R$ 1.640</strong> para o nível prata, que rende 25% em cada venda.</p>
+          </div>
+
+          <a class="btn" href="#cadastro">Quero começar a vender</a>
+          <p class="calc-hero__note" id="calc-hint">Simulação com o percentual da sua faixa, vendendo tudo pelo preço da revista. Pedido mínimo de R$ 360, em até 10x sem juros.</p>
+        </aside>
+      </div>
+
+      <svg class="brush" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
+        <path fill="currentColor" d="M0 32C120 10 240 50 360 34S600 6 720 28s240 30 360 8 240-32 360-12v40H0V32z"/>
+      </svg>
+    </section>
+
+    <section class="cadastro" id="cadastro">
+      <div class="wrap cadastro__grid">
+        <div class="cadastro__copy reveal">
+          <p class="eyebrow">Só 2 minutos</p>
+          <h2 class="script section-title">Faça seu cadastro</h2>
+          <p>Preencha o formulário e comece a vender.</p>
+          <ul class="perks">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"/></svg>
+              <div>Você ganha mais quando vende mais<span>Já começa ganhando 20% em cada venda</span></div>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"/></svg>
+              <div>Entrega para todo o Brasil<span>Em até 10x sem juros, com frete grátis quando aplicável</span></div>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m20 6-11 11-5-5"/></svg>
+              <div>Cadastro gratuito<span>Você não paga nada para começar a vender</span></div>
+            </li>
+          </ul>
+
+          <div class="lider">
+            <div class="lider__head">
+              <div class="lider__photo">
+                <img src="assets/web/lider-rosto.jpg" alt="" />
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.2 1.2-1.9 1.3-.5.1-1.1.1-1.9-.2a12 12 0 0 1-4.4-3 9.3 9.3 0 0 1-1.9-3c-.2-.7-.1-1.3.1-1.7.2-.4.9-1.2 1.3-1.2.3 0 .5 0 .7.4l.8 1.7c.1.2 0 .4-.1.6l-.4.5c-.2.2-.2.3-.1.5.4.8 1.7 2.3 3 2.8.2.1.4.1.6-.1l.6-.7c.2-.2.4-.2.6-.1l1.6.9c.3.1.4.3.4.6 0 .2 0 .5-.1.7Z"/></svg>
+              </div>
+              <div>
+                <span class="lider__tag">Você não está sozinha</span>
+                <h3 class="script">Uma líder te ensina pelo WhatsApp</h3>
+              </div>
+            </div>
+            <p>Você tem o apoio de uma líder de referência que já percorreu esse caminho e conhece o programa. Ela acompanha você pelo WhatsApp desde o início da jornada, ajuda nas primeiras vendas, tira dúvidas e te orienta sobre como aumentar sua renda extra.</p>
+            <a class="lider__link" href="https://wa.me/5511975743863" target="_blank" rel="noopener">
+              Falar com uma líder no WhatsApp
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <form class="form reveal" id="lead-form" data-step="dados" novalidate>
+          <span class="form__tag">Inscrições abertas</span>
+          <h3 class="script" id="lead-title">Cadastro grátis</h3>
+          <p id="lead-intro">Leva menos de 2 minutos. Depois é só escolher os produtos e vender.</p>
+          <div class="form__status" id="lead-status" role="status" aria-live="polite"></div>
+
+          <div class="form__step form__step--dados">
+            <div class="form__grid">
+              <label class="full">Nome completo
+                <input type="text" name="nome" required autocomplete="name" placeholder="Seu nome" />
+              </label>
+              <label class="full">E-mail
+                <input id="lead-email" type="email" name="email" required autocomplete="email" placeholder="voce@email.com" />
+              </label>
+              <label class="full">Confirme o e-mail
+                <input id="lead-email-confirma" type="email" name="email_confirmacao" required autocomplete="email" placeholder="Digite o e-mail de novo" />
+              </label>
+              <label>CPF
+                <input id="lead-cpf" type="text" name="cpf" required inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00" />
+              </label>
+              <label>WhatsApp
+                <input id="lead-telefone" type="tel" name="telefone" required autocomplete="tel" maxlength="16" placeholder="(11) 99999-9999" />
+              </label>
+              <label>Data de nascimento
+                <input id="lead-nascimento" type="date" name="nascimento" required autocomplete="bday" />
+              </label>
+              <label>Gênero
+                <select id="lead-genero" name="genero" required>
+                  <option value="">Selecione</option>
+                  <option value="1">Feminino</option>
+                  <option value="2">Masculino</option>
+                  <option value="3">Prefiro não informar</option>
+                </select>
+              </label>
+              <p class="form__sep">Endereço de entrega</p>
+              <label>CEP
+                <input id="lead-cep" type="text" name="cep" required inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" />
+              </label>
+              <label for="lead-uf">UF
+                <select id="lead-uf" name="uf" required autocomplete="address-level1">
+                  <option value="">Selecione</option>
+                  <option value="AC">AC</option>
+                  <option value="AL">AL</option>
+                  <option value="AP">AP</option>
+                  <option value="AM">AM</option>
+                  <option value="BA">BA</option>
+                  <option value="CE">CE</option>
+                  <option value="DF">DF</option>
+                  <option value="ES">ES</option>
+                  <option value="GO">GO</option>
+                  <option value="MA">MA</option>
+                  <option value="MT">MT</option>
+                  <option value="MS">MS</option>
+                  <option value="MG">MG</option>
+                  <option value="PA">PA</option>
+                  <option value="PB">PB</option>
+                  <option value="PR">PR</option>
+                  <option value="PE">PE</option>
+                  <option value="PI">PI</option>
+                  <option value="RJ">RJ</option>
+                  <option value="RN">RN</option>
+                  <option value="RS">RS</option>
+                  <option value="RO">RO</option>
+                  <option value="RR">RR</option>
+                  <option value="SC">SC</option>
+                  <option value="SP">SP</option>
+                  <option value="SE">SE</option>
+                  <option value="TO">TO</option>
+                </select>
+              </label>
+              <label class="full">Logradouro
+                <input id="lead-logradouro" type="text" name="logradouro" required autocomplete="address-line1" placeholder="Rua, avenida ou travessa" />
+              </label>
+              <label>Número
+                <input id="lead-numero" type="text" name="numero" required inputmode="numeric" autocomplete="address-line2" placeholder="123" />
+              </label>
+              <label><span>Complemento <em>(opcional)</em></span>
+                <input id="lead-complemento" type="text" name="complemento" autocomplete="address-line3" placeholder="Apto, bloco, casa" />
+              </label>
+              <label>Bairro
+                <input id="lead-bairro" type="text" name="bairro" required autocomplete="address-level3" placeholder="Seu bairro" />
+              </label>
+              <label>Cidade
+                <input id="lead-cidade" type="text" name="cidade" required autocomplete="address-level2" placeholder="Sua cidade" />
+              </label>
+              <label class="full"><span>Ponto de referência <em>(opcional)</em></span>
+                <input id="lead-referencia" type="text" name="referencia" autocomplete="off" placeholder="Perto de..., portão azul, ao lado da padaria" />
+              </label>
+            </div>
+            <label class="form__check">
+              <input id="lead-termos" type="checkbox" name="aceite_termos" required />
+              <span>Li e aceito os termos do programa de revenda L'Occitane au Brésil.</span>
+            </label>
+            <button class="btn" id="lead-submit" type="submit">Quero começar a vender</button>
+            <p class="form__note">Validamos CEP, e-mail e CPF. Se estiver tudo certo, enviamos um código para o seu e-mail.</p>
+          </div>
+
+          <div class="form__step form__step--existe">
+            <div class="form__actions">
+              <a class="btn" id="lead-ir-gera" href="https://revendedor.loccitaneaubresil.com/" target="_blank" rel="noopener">Entrar no Escritório Virtual</a>
+              <button class="btn btn--ghost" id="lead-voltar-existe" type="button">Voltar ao formulário</button>
+            </div>
+          </div>
+
+          <div class="form__step form__step--codigo">
+            <label class="full">Código de 6 dígitos
+              <input id="lead-otp" type="text" name="codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" />
+            </label>
+            <div class="form__actions">
+              <button class="btn" id="lead-validar-otp" type="button">Confirmar código</button>
+              <button class="btn btn--ghost" id="lead-reenviar-otp" type="button">Reenviar código</button>
+              <button class="btn btn--ghost" id="lead-voltar-codigo" type="button">Voltar ao formulário</button>
+            </div>
+            <p class="form__note">O código vale por 10 minutos. Confira também a caixa de spam.</p>
+          </div>
+
+          <div class="form__step form__step--sucesso">
+            <div class="form__credenciais">
+              <div class="form__cred">
+                <span>Login</span>
+                <strong id="lead-login">—</strong>
+              </div>
+              <div class="form__cred">
+                <span>Senha</span>
+                <strong id="lead-senha">—</strong>
+              </div>
+              <div class="form__cred" id="lead-codigo-box">
+                <span>Código de revendedora</span>
+                <strong id="lead-codigo">—</strong>
+              </div>
+            </div>
+            <a class="btn" href="https://revendedor.loccitaneaubresil.com/" target="_blank" rel="noopener">Abrir Escritório Virtual</a>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="passos" id="passos">
+      <div class="wrap">
+        <div class="center reveal">
+          <p class="eyebrow">É fácil</p>
+          <h2 class="script section-title">Como funciona</h2>
+          <p class="section-sub">Do cadastro à primeira venda, tudo pelo celular.</p>
+        </div>
+        <div class="passos__grid reveal">
+          <article class="passo">
+            <div class="passo__n">1</div>
+            <svg class="passo__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+            <h3>Faça o cadastro</h3>
+            <p>Preencha seus dados pelo celular. Leva 2 minutos, é de graça e não tem entrevista.</p>
+          </article>
+          <article class="passo">
+            <div class="passo__n">2</div>
+            <svg class="passo__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8.5h18l-1.6 11a2 2 0 0 1-2 1.7H6.6a2 2 0 0 1-2-1.7L3 8.5Z"/><path d="M8.5 8.5a3.5 3.5 0 0 1 7 0"/></svg>
+            <h3>Monte seu pedido</h3>
+            <p>No site de pedidos você escolhe o que vende mais. O mínimo é R$ 360, já com o seu percentual.</p>
+          </article>
+          <article class="passo">
+            <div class="passo__n">3</div>
+            <svg class="passo__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 10h19"/><path d="M6.5 14.5h4"/></svg>
+            <h3>Pague como preferir</h3>
+            <p>Cartão em até 10x sem juros ou boleto à vista.</p>
+          </article>
+          <article class="passo">
+            <div class="passo__n">4</div>
+            <svg class="passo__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 7.5h10v9h-10z"/><path d="M12.5 11h4.5l3 3v2.5h-7.5z"/><circle cx="6.5" cy="18.2" r="1.6"/><circle cx="16.5" cy="18.2" r="1.6"/></svg>
+            <h3>Receba em casa</h3>
+            <p>O pedido chega no seu endereço, em todo o Brasil. O frete, quando aplicável, aparece antes de você fechar o pedido.</p>
+          </article>
+          <article class="passo">
+            <div class="passo__n">5</div>
+            <svg class="passo__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7L12 2.5Z"/><path d="M3.5 7 12 11.5 20.5 7"/><path d="M12 11.5v10"/></svg>
+            <h3>Os produtos são seus</h3>
+            <p>Não é consignação. Você não devolve nada e vende no seu ritmo.</p>
+          </article>
+          <article class="passo">
+            <div class="passo__n">6</div>
+            <svg class="passo__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="6.5" width="19" height="11" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 10.5v3M18 10.5v3"/></svg>
+            <h3>Venda e ganhe</h3>
+            <p>Venda pelo preço da revista e fique com 20% a 35% de renda extra em cada venda.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="regua" id="crescimento">
+      <div class="wrap">
+        <div class="center reveal">
+          <p class="eyebrow">Quanto você ganha</p>
+          <h2 class="script section-title">Quanto mais vende, mais você lucra</h2>
+          <p class="section-sub">Seu percentual de revendedora cresce conforme o seu volume de vendas no período. É ele que define sua renda extra em cada venda.</p>
+        </div>
+
+        <div class="regua__card reveal">
+          <div class="regua__grid">
+            <article class="nivel" style="--tier: #B4703A">
+              <div class="nivel__top">
+                <svg class="nivel__mark" viewBox="0 0 100 100" style="color: #C87941" role="img" aria-label="Selo bronze">
+                  <use href="#mark-tier" />
+                </svg>
+                <div class="nivel__label">
+                  <span class="nivel__pct">20%</span>
+                  <span class="script nivel__name">bronze</span>
+                </div>
+              </div>
+              <p class="nivel__range">De <strong>R$ 360</strong><br />até <strong>R$ 1.999</strong></p>
+            </article>
+
+            <article class="nivel" style="--tier: #8C8C8C">
+              <div class="nivel__top">
+                <svg class="nivel__mark" viewBox="0 0 100 100" style="color: #A3A3A3" role="img" aria-label="Selo prata">
+                  <use href="#mark-tier" />
+                </svg>
+                <div class="nivel__label">
+                  <span class="nivel__pct">25%</span>
+                  <span class="script nivel__name">prata</span>
+                </div>
+              </div>
+              <p class="nivel__range">De <strong>R$ 2.000</strong><br />até <strong>R$ 5.999</strong></p>
+            </article>
+
+            <article class="nivel" style="--tier: #C98A12">
+              <div class="nivel__top">
+                <svg class="nivel__mark" viewBox="0 0 100 100" style="color: #E9A320" role="img" aria-label="Selo ouro">
+                  <use href="#mark-tier" />
+                </svg>
+                <div class="nivel__label">
+                  <span class="nivel__pct">30%</span>
+                  <span class="script nivel__name">ouro</span>
+                </div>
+              </div>
+              <p class="nivel__range">De <strong>R$ 6.000</strong><br />até <strong>R$ 19.999</strong></p>
+            </article>
+
+            <article class="nivel" style="--tier: #2E86B8">
+              <div class="nivel__top">
+                <svg class="nivel__mark" viewBox="0 0 100 100" style="color: #4FA8D8" role="img" aria-label="Selo diamante">
+                  <use href="#mark-tier" />
+                </svg>
+                <div class="nivel__label">
+                  <span class="nivel__pct">35%</span>
+                  <span class="script nivel__name">diamante</span>
+                </div>
+              </div>
+              <p class="nivel__range">Acima de<br /><strong>R$ 20.000</strong></p>
+            </article>
+          </div>
+        </div>
+
+        <p class="regua__note">Todo mundo começa no bronze, com 20%. Vendeu mais no período? Você sobe de nível e seu percentual aumenta.</p>
+      </div>
+    </section>
+
+    <section class="produtos" id="produtos">
+      <div class="wrap">
+        <div class="center reveal">
+          <p class="eyebrow">Os mais pedidos</p>
+          <h2 class="script section-title">Produtos que saem fácil</h2>
+          <p class="section-sub">Suas clientes já conhecem e pedem de novo. Você só mostra e vende.</p>
+        </div>
+        <div class="produtos__grid reveal">
+          <article class="produto">
+            <img src="assets/web/linha-roma.jpg" alt="Linha Romã" loading="lazy" />
+            <h3 class="script produto__name">Romã</h3>
+          </article>
+          <article class="produto">
+            <img src="assets/web/linha-caju.jpg" alt="Linha Caju" loading="lazy" />
+            <h3 class="script produto__name">Caju</h3>
+          </article>
+          <article class="produto">
+            <img src="assets/web/linha-capim.jpg" alt="Linha Capim-Limão" loading="lazy" />
+            <h3 class="script produto__name">Capim-Limão</h3>
+          </article>
+          <article class="produto">
+            <img src="assets/web/hero-bresil.jpg" alt="Perfume Brésil" loading="lazy" />
+            <h3 class="script produto__name">Brésil</h3>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!--<section class="kit" id="kit">
+      <div class="wrap">
+        <div class="kit__head reveal">
+          <div>
+            <p class="eyebrow">Primeiro pedido</p>
+            <h2 class="script section-title">O que vender primeiro</h2>
+            <p class="section-sub">Itens que vendem rápido. Seu primeiro pedido é de R$ 360.</p>
+          </div>
+          <a class="btn btn--ghost" href="#cadastro">Quero começar</a>
+        </div>
+        <div class="kit__grid reveal">
+          <article class="kit__item">
+            <img src="assets/web/pack-geleia.png" alt="Geleia Hidratante Corporal Romã 200ml" loading="lazy" />
+            <h3>Geleia Hidratante Romã 200ml</h3>
+            <p>R$ 99,90</p>
+          </article>
+          <article class="kit__item">
+            <img src="assets/web/pack-deo.png" alt="Deo Colônia Capim-Limão 100ml" loading="lazy" />
+            <h3>Deo Colônia Capim-Limão 100ml</h3>
+            <p>R$ 129,90</p>
+          </article>
+          <article class="kit__item">
+            <img src="assets/web/pack-caju.png" alt="Kit Caju Viagem" loading="lazy" />
+            <h3>Kit Caju Viagem</h3>
+            <p>R$ 84,90</p>
+          </article>
+          <article class="kit__item">
+            <img src="assets/web/pack-sacola.png" alt="Sacolas para entrega" loading="lazy" />
+            <h3>Sacolas P (10 unidades)</h3>
+            <p>R$ 10,80</p>
+          </article>
+        </div>
+        <div class="kit__foot reveal">
+          <p><strong>Você escolhe o que quer vender.</strong> Estes são os preços da revista: você vende por esse valor e fica com até 35% de renda extra.</p>
+          <a class="btn" href="#cadastro">Quero começar a vender</a>
+        </div>
+      </div>
+    </section>-->
+
+    <section class="depos" id="depoimentos">
+      <div class="wrap">
+        <div class="center reveal">
+          <p class="eyebrow">Quem já vende</p>
+          <h2 class="script section-title">O que elas contam</h2>
+        </div>
+        <div class="depos__grid reveal">
+          <article class="depo">
+            <div class="depo__stars" aria-label="5 de 5 estrelas">★★★★★</div>
+            <p>“Vender L'Occitane au Brésil é um prazer, pois cada linha conta uma história única, trazendo a riqueza da nossa terra em fragrâncias encantadoras e muito exclusivas.”</p>
+            <div class="depo__who">
+              <img src="assets/web/depoimento-1.jpg" alt="" />
+              <div>
+                <strong>Larissa Cecato</strong>
+                <span>revendedora desde set/2023</span>
+              </div>
+            </div>
+          </article>
+          <article class="depo">
+            <div class="depo__stars" aria-label="5 de 5 estrelas">★★★★★</div>
+            <p>“No início, ninguém conhecia a marca. Depois, com o marketing e a demonstração dos produtos para as clientes, as vendas foram um sucesso!”</p>
+            <div class="depo__who">
+              <img src="assets/web/depoimento-3.jpg" alt="" />
+              <div>
+                <strong>Andrea Croce</strong>
+                <span>revendedora desde jan/2024</span>
+              </div>
+            </div>
+          </article>
+          <article class="depo">
+            <div class="depo__stars" aria-label="5 de 5 estrelas">★★★★★</div>
+            <p>“Experiência muito positiva. Produtos maravilhosos e clientes que sempre voltam para comprar de novo.”</p>
+            <div class="depo__who">
+              <img src="assets/web/depoimento-2.jpg" alt="" />
+              <div>
+                <strong>Monise Vitor</strong>
+                <span>revendedora desde jan/2023</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq" id="duvidas">
+      <div class="wrap faq__grid">
+        <div class="faq__aside reveal">
+          <p class="eyebrow">Tire suas dúvidas</p>
+          <h2 class="script section-title">Perguntas</h2>
+          <span class="badge-vip badge-vip--light">
+            <img src="assets/web/lider-rosto.jpg" alt="" />
+            <span><strong>Uma líder</strong> te ajuda pelo WhatsApp</span>
+          </span>
+        </div>
+        <div class="reveal">
+          <details class="vip" open>
+            <summary>Alguém me ajuda?</summary>
+            <p>Sim. Uma líder fala com você pelo WhatsApp e te ensina a vender desde o primeiro dia. Também tem o atendimento oficial, de segunda a sexta, das 9h às 18h. <a href="https://wa.me/5511975743863" target="_blank" rel="noopener">Falar no WhatsApp</a></p>
+          </details>
+          <details>
+            <summary>Quem pode vender?</summary>
+            <p>Qualquer pessoa com mais de 18 anos e CPF.</p>
+          </details>
+          <details>
+            <summary>O modelo do programa funciona por consignação?</summary>
+            <p>Não. Os produtos são seus desde o pedido, com o seu percentual de revendedora aplicado, e toda a renda extra da venda fica com você.</p>
+          </details>
+          <details>
+            <summary>Quanto eu ganho?</summary>
+            <p>Você vende pelo preço da revista e fica com no mínimo 20% de cada venda como renda extra. Vendendo mais, o percentual chega a 35%.</p>
+          </details>
+          <details>
+            <summary>Qual o pedido mínimo?</summary>
+            <p>R$ 360 em cada pedido, já com o seu percentual aplicado. Você escolhe quais produtos e quantos vai vender.</p>
+          </details>
+          <details>
+            <summary>Como pago? Quando chega?</summary>
+            <p>No cartão em até 10x sem juros ou no boleto à vista. A entrega é para todo o Brasil e o frete, quando aplicável, aparece no fechamento do pedido.</p>
+          </details>
+          <details>
+            <summary>Preciso fazer pedido todo mês?</summary>
+            <p>Não. Você pode ficar até 6 ciclos sem fazer pedido — ciclo é o período de cada campanha da marca. Depois disso o cadastro fica parado, mas dá para reativar quando quiser.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="final">
+      <div class="wrap reveal">
+        <h2 class="script">Comece a vender hoje</h2>
+        <p>Cadastro de graça, pagamento em até 10x e renda extra já na primeira venda.</p>
+        <a class="btn btn--cream" href="#cadastro">Quero começar a vender</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <a class="footer__logo" href="#topo">
+        <img src="assets/web/logo-branco-transparente.png" alt="L'Occitane au Brésil" />
+      </a>
+      <div class="footer__links">
+        <a href="#cadastro">Cadastro</a>
+        <a href="https://revendedor.loccitaneaubresil.com/" target="_blank" rel="noopener">Site de pedidos</a>
+        <a href="https://wa.me/5511975743863" target="_blank" rel="noopener">WhatsApp</a>
+        <a href="https://www.instagram.com/loccitaneaubresil/" target="_blank" rel="noopener">Instagram</a>
+      </div>
+      <p class="footer__copy">© L'Occitane au Brésil — Revenda. Brasilidade efervescente com um toque francês.</p>
+    </div>
+  </footer>
+
+  <a class="sticky-cta" id="sticky-cta" href="#cadastro">Quero me cadastrar</a>
+
+  <script>
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-in");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+    const form = document.getElementById("lead-form");
+    const cpfInput = document.getElementById("lead-cpf");
+    const emailInput = document.getElementById("lead-email");
+    const emailConfirmaInput = document.getElementById("lead-email-confirma");
+    const telefoneInput = document.getElementById("lead-telefone");
+    const nascimentoInput = document.getElementById("lead-nascimento");
+    const cepInput = document.getElementById("lead-cep");
+    const logradouroInput = document.getElementById("lead-logradouro");
+    const bairroInput = document.getElementById("lead-bairro");
+    const cidadeInput = document.getElementById("lead-cidade");
+    const ufInput = document.getElementById("lead-uf");
+    const numeroInput = document.getElementById("lead-numero");
+    const complementoInput = document.getElementById("lead-complemento");
+    const referenciaInput = document.getElementById("lead-referencia");
+    const termosInput = document.getElementById("lead-termos");
+    const submitBtn = document.getElementById("lead-submit");
+    const statusBox = document.getElementById("lead-status");
+    const titleEl = document.getElementById("lead-title");
+    const introEl = document.getElementById("lead-intro");
+    const otpInput = document.getElementById("lead-otp");
+    const validarOtpBtn = document.getElementById("lead-validar-otp");
+    const reenviarOtpBtn = document.getElementById("lead-reenviar-otp");
+    let recaptchaSiteKey = "";
+    let escritorioUrl = "https://revendedor.loccitaneaubresil.com/";
+    let payloadAtual = null;
+    let cooldownReenvio = null;
+
+    const soDigitos = (valor) => String(valor || "").replace(/\D/g, "");
+    const normalizarEmail = (valor) => valor.trim().toLowerCase();
+
+    const mostrarStatus = (tipo, html) => {
+      statusBox.className = `form__status is-visible is-${tipo}`;
+      statusBox.innerHTML = html;
+    };
+    const limparStatus = () => {
+      statusBox.className = "form__status";
+      statusBox.textContent = "";
+    };
+
+    const validarEmails = () => {
+      if (!emailConfirmaInput.value || !emailInput.checkValidity()) {
+        emailConfirmaInput.setCustomValidity("");
+        return;
+      }
+      const iguais = normalizarEmail(emailInput.value) === normalizarEmail(emailConfirmaInput.value);
+      emailConfirmaInput.setCustomValidity(iguais ? "" : "Os e-mails não são iguais. Confira os dois campos.");
+    };
+
+    [emailInput, emailConfirmaInput].forEach((campo) => {
+      campo.addEventListener("input", () => emailConfirmaInput.setCustomValidity(""));
+      campo.addEventListener("blur", validarEmails);
+    });
+
+    const mascararCpf = (valor) => valor
+      .replace(/\D/g, "")
+      .slice(0, 11)
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, "$1.$2.$3-$4");
+
+    const mascararCep = (valor) => valor
+      .replace(/\D/g, "")
+      .slice(0, 8)
+      .replace(/(\d{5})(\d)/, "$1-$2");
+
+    const mascararTelefone = (valor) => {
+      const numeros = valor.replace(/\D/g, "").slice(0, 11);
+      if (numeros.length <= 10) {
+        return numeros
+          .replace(/(\d{2})(\d)/, "($1) $2")
+          .replace(/(\d{4})(\d)/, "$1-$2");
+      }
+      return numeros
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{5})(\d)/, "$1-$2");
+    };
+
+    const cpfValido = (valor) => {
+      const numeros = valor.replace(/\D/g, "");
+      if (numeros.length !== 11 || /^(\d)\1{10}$/.test(numeros)) return false;
+      const digito = (tamanho) => {
+        let soma = 0;
+        for (let i = 0; i < tamanho; i += 1) soma += Number(numeros[i]) * (tamanho + 1 - i);
+        const resto = (soma * 10) % 11;
+        return resto === 10 ? 0 : resto;
+      };
+      return digito(9) === Number(numeros[9]) && digito(10) === Number(numeros[10]);
+    };
+
+    const validarCpf = () => {
+      if (!cpfInput.value) {
+        cpfInput.setCustomValidity("");
+        return;
+      }
+      cpfInput.setCustomValidity(cpfValido(cpfInput.value) ? "" : "Confira o seu CPF: os números não estão corretos.");
+    };
+
+    const maiorDeIdade = (valor) => {
+      if (!valor) return false;
+      const nascimento = new Date(`${valor}T00:00:00`);
+      if (Number.isNaN(nascimento.getTime())) return false;
+      const hoje = new Date();
+      const idade = hoje.getFullYear() - nascimento.getFullYear();
+      const aniversarioEsteAno = new Date(hoje.getFullYear(), nascimento.getMonth(), nascimento.getDate());
+      return idade - (hoje < aniversarioEsteAno ? 1 : 0) >= 18;
+    };
+
+    const validarNascimento = () => {
+      if (!nascimentoInput.value) {
+        nascimentoInput.setCustomValidity("");
+        return;
+      }
+      nascimentoInput.setCustomValidity(maiorDeIdade(nascimentoInput.value) ? "" : "O cadastro é para pessoas com 18 anos ou mais.");
+    };
+
+    cpfInput.addEventListener("input", () => {
+      cpfInput.value = mascararCpf(cpfInput.value);
+      cpfInput.setCustomValidity("");
+    });
+    cpfInput.addEventListener("blur", validarCpf);
+
+    telefoneInput.addEventListener("input", () => {
+      telefoneInput.value = mascararTelefone(telefoneInput.value);
+    });
+
+    nascimentoInput.addEventListener("change", validarNascimento);
+    nascimentoInput.addEventListener("blur", validarNascimento);
+
+    let cepNaoEncontrado = false;
+    let ultimoCepBuscado = "";
+
+    const validarCep = () => {
+      const numeros = soDigitos(cepInput.value);
+      if (!cepInput.value) {
+        cepInput.setCustomValidity("");
+        return;
+      }
+      if (numeros.length !== 8) {
+        cepInput.setCustomValidity("Confira o CEP: são 8 números.");
+        return;
+      }
+      cepInput.setCustomValidity(cepNaoEncontrado ? "CEP não encontrado. Confira o número ou preencha o endereço à mão." : "");
+    };
+
+    const buscarCep = async () => {
+      const numeros = soDigitos(cepInput.value);
+      if (numeros.length !== 8 || numeros === ultimoCepBuscado) return;
+      ultimoCepBuscado = numeros;
+      try {
+        const resposta = await fetch(`https://viacep.com.br/ws/${numeros}/json/`);
+        const dados = await resposta.json();
+        cepNaoEncontrado = Boolean(dados.erro);
+        if (cepNaoEncontrado) {
+          validarCep();
+          cepInput.reportValidity();
+          return;
+        }
+        if (dados.logradouro) logradouroInput.value = dados.logradouro;
+        if (dados.bairro) bairroInput.value = dados.bairro;
+        if (dados.localidade) cidadeInput.value = dados.localidade;
+        if (dados.uf) ufInput.value = dados.uf;
+        validarCep();
+        if (!numeroInput.value) numeroInput.focus({ preventScroll: true });
+      } catch {
+        cepNaoEncontrado = false;
+        ultimoCepBuscado = "";
+        validarCep();
+      }
+    };
+
+    cepInput.addEventListener("input", () => {
+      cepInput.value = mascararCep(cepInput.value);
+      cepNaoEncontrado = false;
+      cepInput.setCustomValidity("");
+      if (soDigitos(cepInput.value).length === 8) buscarCep();
+    });
+    cepInput.addEventListener("blur", () => {
+      buscarCep();
+      validarCep();
+    });
+
+    const irParaPasso = (passo, { titulo, intro } = {}) => {
+      form.dataset.step = passo;
+      if (titulo) titleEl.textContent = titulo;
+      if (intro) introEl.textContent = intro;
+    };
+
+    const montarPayload = () => {
+      const nascimento = nascimentoInput.value
+        ? new Date(`${nascimentoInput.value}T00:00:00`).toISOString()
+        : "";
+      return {
+        nome: form.elements.nome.value.trim(),
+        email: normalizarEmail(emailInput.value),
+        cpf: soDigitos(cpfInput.value),
+        telefone: soDigitos(telefoneInput.value),
+        birthday: nascimento,
+        gender: Number(form.elements.genero.value),
+        zipCode: soDigitos(cepInput.value),
+        addressNumber: numeroInput.value.trim(),
+        rua: logradouroInput.value.trim(),
+        complemento: complementoInput.value.trim(),
+        referencia: referenciaInput.value.trim(),
+        bairro: bairroInput.value.trim(),
+        cidade: cidadeInput.value.trim(),
+        uf: ufInput.value.trim().toUpperCase(),
+        acceptTerms: termosInput.checked
+      };
+    };
+
+    const chamarApi = async (url, body) => {
+      const resposta = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const data = await resposta.json().catch(() => ({}));
+      return { resposta, data };
+    };
+
+    const carregarRecaptcha = (siteKey) => new Promise((resolve, reject) => {
+      if (!siteKey) {
+        reject(new Error("reCAPTCHA não configurado."));
+        return;
+      }
+      if (window.grecaptcha && window.grecaptcha.execute) {
+        window.grecaptcha.ready(() => resolve(window.grecaptcha));
+        return;
+      }
+      const existente = document.getElementById("recaptcha-v3");
+      const aoCarregar = () => {
+        if (!window.grecaptcha) {
+          reject(new Error("reCAPTCHA não carregou."));
+          return;
+        }
+        window.grecaptcha.ready(() => resolve(window.grecaptcha));
+      };
+      if (existente) {
+        existente.addEventListener("load", aoCarregar, { once: true });
+        return;
+      }
+      const script = document.createElement("script");
+      script.id = "recaptcha-v3";
+      script.src = `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(siteKey)}`;
+      script.async = true;
+      script.onload = aoCarregar;
+      script.onerror = () => reject(new Error("Não foi possível carregar o reCAPTCHA."));
+      document.head.appendChild(script);
+    });
+
+    const obterCaptcha = async (action) => {
+      const grecaptcha = await carregarRecaptcha(recaptchaSiteKey);
+      return grecaptcha.execute(recaptchaSiteKey, { action });
+    };
+
+    const mostrarExistente = (mensagem) => {
+      irParaPasso("existe", {
+        titulo: "Você já tem cadastro",
+        intro: mensagem || "Este CPF ou e-mail já está na L'Occitane au Brésil."
+      });
+      mostrarStatus("error", mensagem || "Já existe um cadastro com este CPF ou e-mail.");
+      document.getElementById("lead-ir-gera").href = escritorioUrl;
+    };
+
+    const iniciarCooldown = () => {
+      let segundos = 60;
+      reenviarOtpBtn.disabled = true;
+      const tick = () => {
+        reenviarOtpBtn.textContent = `Reenviar código (${segundos}s)`;
+        if (segundos <= 0) {
+          window.clearInterval(cooldownReenvio);
+          reenviarOtpBtn.disabled = false;
+          reenviarOtpBtn.textContent = "Reenviar código";
+          return;
+        }
+        segundos -= 1;
+      };
+      tick();
+      window.clearInterval(cooldownReenvio);
+      cooldownReenvio = window.setInterval(tick, 1000);
+    };
+
+    const enviarCodigo = async () => {
+      const captchaToken = await obterCaptcha("otp_generate");
+      const { resposta, data } = await chamarApi("/api/otp/gerar", {
+        email: payloadAtual.email,
+        captcha_token: captchaToken
+      });
+      if (!resposta.ok || !data.ok) {
+        throw new Error(data.message || "Não foi possível enviar o código.");
+      }
+      iniciarCooldown();
+      return data;
+    };
+
+    const mostrarCodigo = (mensagem) => {
+      irParaPasso("codigo", {
+        titulo: "Confirme seu e-mail",
+        intro: `Enviamos um código de 6 dígitos para ${payloadAtual.email}.`
+      });
+      mostrarStatus("success", mensagem || "Código enviado. Confira sua caixa de entrada.");
+      otpInput.value = "";
+      otpInput.focus();
+    };
+
+    const concluirCadastro = async () => {
+      const { resposta, data } = await chamarApi("/api/cadastro", payloadAtual);
+      if (data.existe) {
+        mostrarExistente(data.message);
+        return;
+      }
+      if (!resposta.ok || !data.ok) {
+        throw new Error(data.message || "Não foi possível concluir o cadastro.");
+      }
+      document.getElementById("lead-login").textContent = data.login || payloadAtual.email;
+      document.getElementById("lead-senha").textContent = data.senha || "Enviada para o seu e-mail";
+      const codigoEl = document.getElementById("lead-codigo");
+      const codigoBox = document.getElementById("lead-codigo-box");
+      if (data.codigo) {
+        codigoEl.textContent = data.codigo;
+        codigoBox.style.display = "";
+      } else {
+        codigoBox.style.display = "none";
+      }
+      irParaPasso("sucesso", {
+        titulo: "Cadastro concluído",
+        intro: data.message || "Guarde seu acesso e entre no Escritório Virtual."
+      });
+      mostrarStatus("success", data.message || "Cadastro criado.");
+    };
+
+    fetch("/api/config").then((res) => res.json()).then((config) => {
+      recaptchaSiteKey = config.recaptchaSiteKey || "";
+      escritorioUrl = config.escritorioUrl || escritorioUrl;
+      if (recaptchaSiteKey) carregarRecaptcha(recaptchaSiteKey).catch(() => {});
+    }).catch(() => {});
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      limparStatus();
+      validarCpf();
+      validarEmails();
+      validarNascimento();
+      validarCep();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      payloadAtual = montarPayload();
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Consultando cadastro...";
+
+      try {
+        const { resposta, data } = await chamarApi("/api/verificar", {
+          email: payloadAtual.email,
+          cpf: payloadAtual.cpf
+        });
+        if (data.existe) {
+          mostrarExistente(data.message);
+          return;
+        }
+        if (!resposta.ok || !data.ok) {
+          mostrarStatus("error", data.message || "Não foi possível consultar o cadastro.");
+          return;
+        }
+        submitBtn.textContent = "Enviando código...";
+        const enviado = await enviarCodigo();
+        mostrarCodigo(enviado.message);
+      } catch (erro) {
+        mostrarStatus("error", erro.message || "Sem conexão com o servidor de cadastro. Abra a página em http://localhost:3000.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Quero começar a vender";
+      }
+    });
+
+    otpInput.addEventListener("input", () => {
+      otpInput.value = soDigitos(otpInput.value).slice(0, 6);
+    });
+
+    validarOtpBtn.addEventListener("click", async () => {
+      if (!payloadAtual) return;
+      limparStatus();
+      if (soDigitos(otpInput.value).length !== 6) {
+        mostrarStatus("error", "Digite o código de 6 dígitos enviado por e-mail.");
+        otpInput.focus();
+        return;
+      }
+      validarOtpBtn.disabled = true;
+      validarOtpBtn.textContent = "Validando...";
+      try {
+        const { resposta, data } = await chamarApi("/api/otp/validar", {
+          email: payloadAtual.email,
+          code: otpInput.value
+        });
+        if (!resposta.ok || !data.ok) {
+          mostrarStatus("error", data.message || "Código inválido. Você pode reenviar ou voltar ao formulário.");
+          return;
+        }
+        validarOtpBtn.textContent = "Criando cadastro...";
+        await concluirCadastro();
+      } catch (erro) {
+        mostrarStatus("error", erro.message || "Não foi possível validar o código.");
+      } finally {
+        if (form.dataset.step !== "sucesso") {
+          validarOtpBtn.disabled = false;
+          validarOtpBtn.textContent = "Confirmar código";
+        }
+      }
+    });
+
+    reenviarOtpBtn.addEventListener("click", async () => {
+      if (!payloadAtual) return;
+      limparStatus();
+      reenviarOtpBtn.disabled = true;
+      try {
+        const enviado = await enviarCodigo();
+        mostrarStatus("success", enviado.message || "Enviamos um código novo.");
+      } catch (erro) {
+        mostrarStatus("error", erro.message || "Não foi possível reenviar o código.");
+        reenviarOtpBtn.disabled = false;
+        reenviarOtpBtn.textContent = "Reenviar código";
+      }
+    });
+
+    const voltarAoFormulario = () => {
+      limparStatus();
+      irParaPasso("dados", {
+        titulo: "Cadastro grátis",
+        intro: "Leva menos de 2 minutos. Depois é só escolher os produtos e vender."
+      });
+    };
+    document.getElementById("lead-voltar-existe").addEventListener("click", voltarAoFormulario);
+    document.getElementById("lead-voltar-codigo").addEventListener("click", voltarAoFormulario);
+
+    const sticky = document.getElementById("sticky-cta");
+    const toggleSticky = () => {
+      const rect = form.getBoundingClientRect();
+      const formInView = rect.top < window.innerHeight * 0.75 && rect.bottom > 100;
+      sticky.classList.toggle("is-hidden", formInView);
+    };
+    toggleSticky();
+    window.addEventListener("scroll", toggleSticky, { passive: true });
+    window.addEventListener("resize", toggleSticky);
+
+    const niveis = [
+      { nome: "bronze", percentual: 0.2, min: 360, max: 1999, selo: "#C87941", texto: "#B4703A" },
+      { nome: "prata", percentual: 0.25, min: 2000, max: 5999, selo: "#A3A3A3", texto: "#8C8C8C" },
+      { nome: "ouro", percentual: 0.3, min: 6000, max: 19999, selo: "#E9A320", texto: "#C98A12" },
+      { nome: "diamante", percentual: 0.35, min: 20000, max: Infinity, selo: "#4FA8D8", texto: "#2E86B8" }
+    ];
+    const PEDIDO_MIN = 360;
+    const PEDIDO_MAX = 200000;
+    const brl = new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      maximumFractionDigits: 0
+    });
+
+    const calcInput = document.getElementById("calc-valor");
+    const calcRange = document.getElementById("calc-range");
+    const calcChips = document.querySelectorAll(".calc__chip");
+    const calcOut = {
+      mark: document.getElementById("calc-mark"),
+      pct: document.getElementById("calc-pct"),
+      nome: document.getElementById("calc-nome"),
+      paga: document.getElementById("calc-paga"),
+      vende: document.getElementById("calc-vende"),
+      lucro: document.getElementById("calc-lucro"),
+      msg: document.getElementById("calc-msg"),
+      tier: document.querySelector(".calc__tier"),
+      blocos: document.getElementById("calc-bar").children,
+      passos: document.getElementById("calc-steps").children
+    };
+
+    const nivelDe = (valor) => niveis.find((nivel) => valor <= nivel.max) || niveis[0];
+
+    const atualizarCalc = (valor) => {
+      const indice = niveis.indexOf(nivelDe(valor));
+      const nivel = niveis[indice];
+      const precoRevista = valor / (1 - nivel.percentual);
+      const lucro = precoRevista - valor;
+      const proximo = niveis[indice + 1];
+
+      calcOut.mark.style.color = nivel.selo;
+      calcOut.tier.style.setProperty("--tier", nivel.texto);
+      calcOut.pct.textContent = `${Math.round(nivel.percentual * 100)}%`;
+      calcOut.nome.textContent = nivel.nome;
+      calcOut.paga.textContent = brl.format(valor);
+      calcOut.vende.textContent = brl.format(precoRevista);
+      calcOut.lucro.textContent = brl.format(lucro);
+      niveis.forEach((_, i) => {
+        calcOut.blocos[i].classList.toggle("is-on", i <= indice);
+        calcOut.passos[i].classList.toggle("is-on", i === indice);
+      });
+      calcOut.msg.innerHTML = proximo
+        ? `Faltam <strong>${brl.format(proximo.min - valor)}</strong> para o nível ${proximo.nome}, que rende ${Math.round(proximo.percentual * 100)}% em cada venda.`
+        : "Você já está no <strong>nível diamante</strong>, o maior percentual do programa.";
+
+      calcChips.forEach((chip) => {
+        chip.classList.toggle("is-active", Number(chip.dataset.valor) === valor);
+      });
+    };
+
+    const definirValor = (valor, { escrever = true } = {}) => {
+      const limitado = Math.min(Math.max(Math.round(valor), PEDIDO_MIN), PEDIDO_MAX);
+      if (escrever) calcInput.value = limitado.toLocaleString("pt-BR");
+      calcRange.value = String(Math.min(limitado, Number(calcRange.max)));
+      atualizarCalc(limitado);
+      return limitado;
+    };
+
+    const lerInput = () => Number(calcInput.value.replace(/\D/g, "")) || 0;
+
+    calcInput.addEventListener("input", () => {
+      const digitado = lerInput();
+      calcInput.value = digitado ? digitado.toLocaleString("pt-BR") : "";
+      if (digitado >= PEDIDO_MIN) definirValor(digitado, { escrever: false });
+    });
+    calcInput.addEventListener("change", () => definirValor(lerInput()));
+    calcInput.addEventListener("blur", () => definirValor(lerInput()));
+    calcRange.addEventListener("input", () => definirValor(Number(calcRange.value)));
+    calcChips.forEach((chip) => {
+      chip.addEventListener("click", () => definirValor(Number(chip.dataset.valor)));
+    });
+
+    definirValor(PEDIDO_MIN);
+
+    document.querySelectorAll('a[href="#cadastro"]').forEach((link) => {
+      link.addEventListener("click", () => {
+        window.setTimeout(() => form.querySelector("input")?.focus({ preventScroll: true }), 700);
+      });
+    });
+  </script>
+</body>
+</html>
