@@ -79,7 +79,7 @@ Copie `api/.env.example` para `api/.env` **no servidor**. Esse arquivo **não va
 | `GERA_USERNAME` | código da líder / indicante (`2315`) |
 | `GERA_PASSWORD` | senha do integrador |
 | `GERA_INDICATOR_CODE` | `2315` |
-| `INDICO_API_BASE` | API do OTP Indico (staging: `https://lp-collector-api-mdcah7r3fa-ue.a.run.app`) |
+| `INDICO_API_BASE` | API do OTP Indico (staging: `https://lp-collector-api-670020683031.us-east1.run.app`) |
 | `INDICO_DB_ID` | UUID do destino (`X-Db-ID`) |
 | `INDICO_OTP_PURPOSE` | `registration` |
 | `INDICO_ORIGIN` | origem enviada à Indico — use a URL pública, ex. `https://querorevender.loccitaneaubresil.com` |
