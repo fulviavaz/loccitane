@@ -512,6 +512,17 @@
       border-color: var(--red);
       box-shadow: 0 0 0 3px rgba(192, 32, 49, 0.12);
     }
+    .form input.is-invalid {
+      border-color: var(--red);
+    }
+    .form__field-msg {
+      display: none;
+      font-size: 0.74rem;
+      font-weight: 500;
+      letter-spacing: 0;
+      color: var(--red);
+    }
+    .form__field-msg.is-visible { display: block; }
     .form select {
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E564A' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
@@ -1453,10 +1464,11 @@
                 <input id="lead-email" type="email" name="email" required autocomplete="email" placeholder="voce@email.com" />
               </label>
               <label class="full">Confirme o e-mail
-                <input id="lead-email-confirma" type="email" name="email_confirmacao" required autocomplete="email" placeholder="Digite o e-mail de novo" />
+                <input id="lead-email-confirma" type="email" name="email_confirmacao" required autocomplete="off" spellcheck="false" placeholder="Digite o e-mail de novo, sem colar" />
               </label>
               <label>CPF
-                <input id="lead-cpf" type="text" name="cpf" required inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00" />
+                <input id="lead-cpf" type="text" name="cpf" required inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00" aria-describedby="lead-cpf-msg" />
+                <span class="form__field-msg" id="lead-cpf-msg" role="alert"></span>
               </label>
               <label>WhatsApp
                 <input id="lead-telefone" type="tel" name="telefone" required autocomplete="tel" maxlength="16" placeholder="(11) 99999-9999" />
@@ -1935,6 +1947,33 @@
       campo.addEventListener("blur", validarEmails);
     });
 
+    const bloquearAtalho = (event, tecla) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === tecla) {
+        event.preventDefault();
+      }
+    };
+    ["copy", "cut", "dragstart"].forEach((evento) => {
+      emailInput.addEventListener(evento, (event) => event.preventDefault());
+    });
+    emailInput.addEventListener("keydown", (event) => bloquearAtalho(event, "c"));
+    emailInput.addEventListener("keydown", (event) => bloquearAtalho(event, "x"));
+
+    ["paste", "drop"].forEach((evento) => {
+      emailConfirmaInput.addEventListener(evento, (event) => {
+        event.preventDefault();
+        emailConfirmaInput.setCustomValidity("Digite o e-mail de novo, sem colar.");
+        emailConfirmaInput.reportValidity();
+      });
+    });
+    emailConfirmaInput.addEventListener("keydown", (event) => bloquearAtalho(event, "v"));
+    emailConfirmaInput.addEventListener("beforeinput", (event) => {
+      if (event.inputType && event.inputType.includes("paste")) {
+        event.preventDefault();
+        emailConfirmaInput.setCustomValidity("Digite o e-mail de novo, sem colar.");
+        emailConfirmaInput.reportValidity();
+      }
+    });
+
     const mascararCpf = (valor) => valor
       .replace(/\D/g, "")
       .slice(0, 11)
@@ -1971,12 +2010,29 @@
       return digito(9) === Number(numeros[9]) && digito(10) === Number(numeros[10]);
     };
 
-    const validarCpf = () => {
-      if (!cpfInput.value) {
-        cpfInput.setCustomValidity("");
-        return;
+    const cpfMsg = document.getElementById("lead-cpf-msg");
+    const mensagemCpf = (valor) => {
+      const numeros = soDigitos(valor);
+      if (!valor) return "Informe o CPF.";
+      if (numeros.length !== 11) return "O CPF precisa ter 11 números.";
+      if (!cpfValido(valor)) return "Confira o seu CPF: os números não estão corretos.";
+      return "";
+    };
+    const mostrarErroCpf = (mensagem) => {
+      cpfInput.classList.toggle("is-invalid", Boolean(mensagem));
+      cpfInput.setAttribute("aria-invalid", mensagem ? "true" : "false");
+      cpfMsg.textContent = mensagem;
+      cpfMsg.classList.toggle("is-visible", Boolean(mensagem));
+      cpfInput.setCustomValidity(mensagem);
+    };
+    const validarCpf = ({ exigirPreenchido = false } = {}) => {
+      if (!cpfInput.value && !exigirPreenchido) {
+        mostrarErroCpf("");
+        return true;
       }
-      cpfInput.setCustomValidity(cpfValido(cpfInput.value) ? "" : "Confira o seu CPF: os números não estão corretos.");
+      const mensagem = mensagemCpf(cpfInput.value);
+      mostrarErroCpf(mensagem);
+      return !mensagem;
     };
 
     const maiorDeIdade = (valor) => {
@@ -1999,9 +2055,9 @@
 
     cpfInput.addEventListener("input", () => {
       cpfInput.value = mascararCpf(cpfInput.value);
-      cpfInput.setCustomValidity("");
+      mostrarErroCpf("");
     });
-    cpfInput.addEventListener("blur", validarCpf);
+    cpfInput.addEventListener("blur", () => validarCpf());
 
     telefoneInput.addEventListener("input", () => {
       telefoneInput.value = mascararTelefone(telefoneInput.value);
@@ -2222,7 +2278,7 @@
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       limparStatus();
-      validarCpf();
+      validarCpf({ exigirPreenchido: true });
       validarEmails();
       validarNascimento();
       validarCep();
