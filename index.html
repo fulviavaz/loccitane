@@ -575,6 +575,12 @@
     .form label.form__check span {
       min-width: 0;
     }
+    .form__termos-link {
+      color: var(--red);
+      text-decoration: underline;
+      text-underline-offset: 0.16em;
+    }
+    .form__termos-link:hover { color: var(--red-deep); }
     .form .btn { width: 100%; margin-top: 0.35rem; }
     .form .btn:disabled {
       opacity: 0.72;
@@ -1609,7 +1615,15 @@
             </div>
             <label class="form__check">
               <input id="lead-termos" type="checkbox" name="aceite_termos" required />
-              <span>Li e aceito os termos do programa de revenda L'Occitane au Brésil.</span>
+              <span>Li e aceito os <a class="form__termos-link" href="termos.html" target="_blank" rel="noopener">termos do programa de revenda L'Occitane au Brésil</a>.</span>
+            </label>
+            <label class="form__check">
+              <input id="lead-divulgacao" type="checkbox" name="autorizo_divulgacao" />
+              <span>Autorizo a divulgação dos telefones de contato no site?</span>
+            </label>
+            <label class="form__check">
+              <input id="lead-informativos" type="checkbox" name="receber_informativos" />
+              <span>Desejo receber informativos da L'Occitane au Brésil?</span>
             </label>
             <div class="form__aviso" id="lead-existe-aviso" hidden>
               <strong>Este CPF ou e-mail já está cadastrado.</strong>
@@ -1994,6 +2008,11 @@
     const complementoInput = document.getElementById("lead-complemento");
     const referenciaInput = document.getElementById("lead-referencia");
     const termosInput = document.getElementById("lead-termos");
+    const divulgacaoInput = document.getElementById("lead-divulgacao");
+    const informativosInput = document.getElementById("lead-informativos");
+    document.querySelector(".form__termos-link")?.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
     const submitBtn = document.getElementById("lead-submit");
     const statusBox = document.getElementById("lead-status");
     const titleEl = document.getElementById("lead-title");
@@ -2254,7 +2273,9 @@
         bairro: bairroInput.value.trim(),
         cidade: cidadeInput.value.trim(),
         uf: ufInput.value.trim().toUpperCase(),
-        acceptTerms: termosInput.checked
+        acceptTerms: termosInput.checked,
+        allowsRegisterDivulgation: divulgacaoInput.checked,
+        acceptsMessages: informativosInput.checked
       };
     };
 

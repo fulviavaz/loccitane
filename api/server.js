@@ -104,6 +104,8 @@ const validarPayload = (body) => {
   const cidade = String(body.cidade || "").trim();
   const uf = String(body.uf || "").trim().toUpperCase();
   const acceptTerms = Boolean(body.acceptTerms);
+  const allowsRegisterDivulgation = Boolean(body.allowsRegisterDivulgation);
+  const acceptsMessages = Boolean(body.acceptsMessages);
 
   if (!nome) return { erro: "Informe o nome completo." };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { erro: "Informe um e-mail válido." };
@@ -142,7 +144,9 @@ const validarPayload = (body) => {
       bairro,
       cidade,
       uf,
-      acceptTerms
+      acceptTerms,
+      allowsRegisterDivulgation,
+      acceptsMessages
     }
   };
 };
@@ -252,6 +256,8 @@ const cadastrarRevendedor = async (token, dados, geographicStructureCode, senha)
     addressLevel4: dados.rua,
     mobilePhone: dados.telefone,
     acceptTerms: String(dados.acceptTerms),
+    allowsRegisterDivulgation: String(dados.allowsRegisterDivulgation),
+    acceptsMessages: String(dados.acceptsMessages),
     indicatorCode: INDICATOR_CODE,
     password: senha
   };
