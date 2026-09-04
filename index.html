@@ -618,10 +618,23 @@
       margin: 1rem 0 1.25rem;
     }
     .form__cred {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 0.75rem 1rem;
       padding: 0.85rem 1rem;
       border-radius: 12px;
       background: #FFF6F0;
       border: 1.5px solid #E7D8C8;
+    }
+    .form__cred > div { min-width: 0; overflow: visible; }
+    .form .btn.form__copy {
+      flex-shrink: 0;
+      min-height: 2.2rem;
+      padding: 0.4rem 0.85rem;
+      width: auto;
+      margin: 0;
+      font-size: 0.78rem;
     }
     .form__cred span {
       display: block;
@@ -633,8 +646,22 @@
       margin-bottom: 0.2rem;
     }
     .form__cred strong {
-      font-size: 1.05rem;
-      word-break: break-all;
+      display: block;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 1.02rem;
+      font-weight: 650;
+      line-height: 1.4;
+      padding-inline: 0.15em 0;
+      overflow: visible;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+    @media (max-width: 560px) {
+      .form__cred {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+      }
+      .form .btn.form__copy { width: 100%; }
     }
     .form__note {
       margin-top: 0.9rem;
@@ -1575,18 +1602,27 @@
           <div class="form__step form__step--sucesso">
             <div class="form__credenciais">
               <div class="form__cred">
-                <span>Login</span>
-                <strong id="lead-login">—</strong>
+                <div>
+                  <span>Usuário</span>
+                  <strong id="lead-login">—</strong>
+                </div>
+                <button class="btn btn--ghost form__copy" type="button" data-copy="lead-login">Copiar</button>
               </div>
               <div class="form__cred">
-                <span>Senha</span>
-                <strong id="lead-senha">—</strong>
+                <div>
+                  <span>Senha</span>
+                  <strong id="lead-senha">—</strong>
+                </div>
+                <button class="btn btn--ghost form__copy" type="button" data-copy="lead-senha">Copiar</button>
               </div>
               <div class="form__cred" id="lead-codigo-box">
-                <span>Código de revendedora</span>
-                <strong id="lead-codigo">—</strong>
+                <div>
+                  <span>Código de revendedora</span>
+                  <strong id="lead-codigo">—</strong>
+                </div>
               </div>
             </div>
+            <p class="form__note">Enviamos a senha de acesso para este e-mail. Confira também a caixa de spam. A senha vale por 5 dias.</p>
             <a class="btn" href="https://revendedor.loccitaneaubresil.com/" target="_blank" rel="noopener">Abrir Escritório Virtual</a>
           </div>
         </form>
@@ -2255,11 +2291,20 @@
       if (!resposta.ok || !data.ok) {
         throw new Error(data.message || "Não foi possível concluir o cadastro.");
       }
-      document.getElementById("lead-login").textContent = data.login || payloadAtual.email;
-      document.getElementById("lead-senha").textContent = data.senha || "Enviada para o seu e-mail";
+      const login = data.login || payloadAtual.email;
+      document.getElementById("lead-login").textContent = login;
+      const senhaEl = document.getElementById("lead-senha");
+      const senhaCopy = document.querySelector('[data-copy="lead-senha"]');
+      if (data.senha) {
+        senhaEl.textContent = data.senha;
+        if (senhaCopy) senhaCopy.style.display = "";
+      } else {
+        senhaEl.textContent = "Enviada para o seu e-mail";
+        if (senhaCopy) senhaCopy.style.display = "none";
+      }
       const codigoEl = document.getElementById("lead-codigo");
       const codigoBox = document.getElementById("lead-codigo-box");
-      if (data.codigo) {
+      if (data.codigo && String(data.codigo) !== String(login)) {
         codigoEl.textContent = data.codigo;
         codigoBox.style.display = "";
       } else {
@@ -2353,6 +2398,24 @@
       }
     });
 
+    document.querySelectorAll(".form__copy").forEach((botao) => {
+      botao.addEventListener("click", async () => {
+        const alvo = document.getElementById(botao.dataset.copy);
+        const texto = alvo?.textContent?.trim();
+        if (!texto || texto === "—") return;
+        try {
+          await navigator.clipboard.writeText(texto);
+          const original = botao.textContent;
+          botao.textContent = "Copiado";
+          window.setTimeout(() => {
+            botao.textContent = original;
+          }, 1600);
+        } catch {
+          mostrarStatus("error", "Não foi possível copiar. Selecione o texto e copie.");
+        }
+      });
+    });
+
     reenviarOtpBtn.addEventListener("click", async () => {
       if (!payloadAtual) return;
       limparStatus();
@@ -2376,6 +2439,16 @@
     };
     document.getElementById("lead-voltar-existe").addEventListener("click", voltarAoFormulario);
     document.getElementById("lead-voltar-codigo").addEventListener("click", voltarAoFormulario);
+
+    if (new URLSearchParams(window.location.search).get("preview") === "sucesso") {
+      document.getElementById("lead-login").textContent = "maria.silva@gmail.com";
+      document.getElementById("lead-senha").textContent = "Locci@Ab3$xY";
+      document.getElementById("lead-codigo-box").style.display = "none";
+      irParaPasso("sucesso", {
+        titulo: "Cadastro concluído",
+        intro: "Guarde seu acesso e entre no Escritório Virtual."
+      });
+    }
 
     const sticky = document.getElementById("sticky-cta");
     const toggleSticky = () => {

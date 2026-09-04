@@ -80,6 +80,7 @@ Copie `api/.env.example` para `api/.env` **no servidor**. Esse arquivo **não va
 | `GERA_PASSWORD` | senha do integrador |
 | `GERA_INDICATOR_CODE` | `2315` |
 | `GERA_ZIPCODE_PATH` | `/api/Public/GeographicalStructures?postalCode={cep}` |
+| `GERA_PASSWORD_PATH` | `/api/password` (PATCH da senha, se o POST não gravar) |
 | `INDICO_API_BASE` | API do OTP Indico (staging: `https://lp-collector-api-670020683031.us-east1.run.app`) |
 | `INDICO_DB_ID` | UUID do destino (`X-Db-ID`) |
 | `INDICO_OTP_PURPOSE` | `registration` |
@@ -103,7 +104,7 @@ Em produção: `https://querorevender.loccitaneaubresil.com` (ou o domínio fina
    - Não existe → segue.
 3. `POST /api/otp/gerar` envia o código de 6 dígitos (Indico).
 4. `POST /api/otp/validar` confere o PIN.
-5. `POST /api/cadastro` cria o revendedor na Gera. A senha vai por e-mail.
+5. `POST /api/cadastro` cria o revendedor na Gera, gera uma senha `Locci@` e mostra usuário/senha na tela de confirmação.
 
 ## Local
 

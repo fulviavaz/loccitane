@@ -1,4 +1,5 @@
 require("dotenv").config();
+const crypto = require("crypto");
 const path = require("path");
 const express = require("express");
 
@@ -10,6 +11,8 @@ const ZIPCODE_PATH = process.env.GERA_ZIPCODE_PATH || "/api/Public/GeographicalS
 const DOCUMENT_TYPE_CPF = process.env.GERA_DOCUMENT_TYPE_CPF || "1";
 const INDICATOR_CODE = process.env.GERA_INDICATOR_CODE || "2315";
 const REGISTRATION_ORIGIN = process.env.GERA_REGISTRATION_ORIGIN || "";
+const SENHA_PREFIXO = "Locci@";
+const SENHA_ALFABETO = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789#$@";
 
 const tokenCache = { token: "", expiresAt: 0 };
 
@@ -218,7 +221,16 @@ const resolverEstruturaGeografica = async (token, zipCode, logradouro) => {
   return escolherCodigoLogradouro(corpo, logradouro);
 };
 
-const cadastrarRevendedor = async (token, dados, geographicStructureCode) => {
+const gerarSenhaAleatoria = () => {
+  const bytes = crypto.randomBytes(6);
+  let sufixo = "";
+  for (let i = 0; i < 6; i += 1) {
+    sufixo += SENHA_ALFABETO[bytes[i] % SENHA_ALFABETO.length];
+  }
+  return `${SENHA_PREFIXO}${sufixo}`;
+};
+
+const cadastrarRevendedor = async (token, dados, geographicStructureCode, senha) => {
   const campos = {
     name: dados.nome,
     mainDocument: dados.cpf,
@@ -234,7 +246,8 @@ const cadastrarRevendedor = async (token, dados, geographicStructureCode) => {
     addressLevel4: dados.rua,
     mobilePhone: dados.telefone,
     acceptTerms: String(dados.acceptTerms),
-    indicatorCode: INDICATOR_CODE
+    indicatorCode: INDICATOR_CODE,
+    password: senha
   };
 
   if (dados.complemento) campos.addressComplement = dados.complemento;
@@ -560,7 +573,13 @@ app.post("/api/cadastro", async (req, res) => {
       geographicStructureCode = "";
     }
 
-    const { resposta, corpo } = await cadastrarRevendedor(token, validacao.dados, geographicStructureCode);
+    const senha = gerarSenhaAleatoria();
+    const { resposta, corpo } = await cadastrarRevendedor(
+      token,
+      validacao.dados,
+      geographicStructureCode,
+      senha
+    );
     if (!resposta.ok) {
       const bruta = extrairMensagem(corpo);
       const existe = /already|exist|duplicate|já cadastr|ja cadastr|em uso/i.test(bruta);
@@ -578,24 +597,15 @@ app.post("/api/cadastro", async (req, res) => {
     } catch {
       detalhe = {};
     }
-    const credenciais = {
-      ...extrairCredenciais(corpo, validacao.dados.email),
-      ...Object.fromEntries(
-        Object.entries(extrairCredenciais(detalhe, validacao.dados.email)).filter(([, valor]) => valor)
-      )
-    };
-    if (!credenciais.codigo && codigo) credenciais.codigo = codigo;
-    if (!credenciais.login) credenciais.login = validacao.dados.email;
+    const codigoFinal = extrairCodigoRevendedora(detalhe) || codigo;
     emailsVerificados.delete(validacao.dados.email);
 
     return res.json({
       ok: true,
-      login: credenciais.login,
-      senha: credenciais.senha,
-      codigo: credenciais.codigo,
-      message: credenciais.senha
-        ? "Cadastro criado. Guarde seu login e senha."
-        : "Cadastro criado. A senha de acesso foi enviada para o seu e-mail."
+      login: validacao.dados.email,
+      senha,
+      codigo: codigoFinal,
+      message: "Cadastro criado. Guarde seu usuário e senha agora."
     });
   } catch (erro) {
     return res.status(502).json({
