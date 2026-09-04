@@ -275,8 +275,10 @@ const INDICO_ORIGIN = process.env.INDICO_ORIGIN || "http://localhost:3000";
 const RECAPTCHA_SITE_KEY = process.env.RECAPTCHA_SITE_KEY || "";
 const LOOKUP_PATHS = String(process.env.GERA_LOOKUP_PATHS || [
   "/api/Public/People?mainDocument={cpf}",
+  "/api/Public/People?mainDocument={cpf}&mainDocumentTypeId=1",
   "/api/Public/People?email={email}",
   "/api/Public/Sellers?mainDocument={cpf}",
+  "/api/Public/Sellers?mainDocument={cpf}&mainDocumentTypeId=1",
   "/api/Public/Sellers?email={email}"
 ].join(",")).split(",").map((item) => item.trim()).filter(Boolean);
 const SELLER_GET_PATH = process.env.GERA_SELLER_GET_PATH || "/api/Public/Sellers/{code}";
@@ -296,41 +298,62 @@ const emailFoiVerificado = (email) => {
 };
 
 const temRegistro = (corpo) => {
-  if (!corpo || typeof corpo !== "object") return false;
+  if (corpo == null) return false;
   if (Array.isArray(corpo)) return corpo.length > 0;
-  if (Array.isArray(corpo.items)) return corpo.items.length > 0;
-  if (Array.isArray(corpo.data)) return corpo.data.length > 0;
-  if (Array.isArray(corpo.results)) return corpo.results.length > 0;
+  if (typeof corpo !== "object") return false;
+  const listas = [corpo.items, corpo.data, corpo.results, corpo.value, corpo.result, corpo.people, corpo.sellers];
+  if (listas.some((lista) => Array.isArray(lista) && lista.length > 0)) return true;
+  if (Number(corpo.totalCount || corpo.total || corpo.count) > 0) return true;
   return Boolean(
     corpo.id
     || corpo.code
     || corpo.personCode
     || corpo.sellerCode
+    || corpo.personId
     || corpo.mainDocument
     || corpo.email
   );
 };
 
+const caminhosLookup = (tipo) => LOOKUP_PATHS.filter((modelo) => (
+  tipo === "cpf" ? /\{cpf\}|document|cpf/i.test(modelo) : /\{email\}|email/i.test(modelo)
+));
+
+const buscarRegistro = async (token, caminho) => {
+  try {
+    const resposta = await fetch(joinUrl(BASE_URL, caminho), {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (resposta.status === 404 || resposta.status === 204) return false;
+    if (!resposta.ok) return false;
+    return temRegistro(await lerJsonSeguro(resposta));
+  } catch {
+    return false;
+  }
+};
+
 const consultarExistencia = async (token, { cpf, email }) => {
-  for (const modelo of LOOKUP_PATHS) {
-    const caminho = modelo
-      .replace("{cpf}", encodeURIComponent(cpf))
-      .replace("{email}", encodeURIComponent(email));
-    try {
-      const resposta = await fetch(joinUrl(BASE_URL, caminho), {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (resposta.status === 404) continue;
-      const corpo = await lerJsonSeguro(resposta);
-      if (resposta.ok && temRegistro(corpo)) {
-        const porCpf = /document|cpf/i.test(modelo);
-        return { existe: true, campo: porCpf ? "CPF" : "e-mail" };
+  const campos = [];
+  if (cpf && cpf.length === 11) {
+    for (const modelo of caminhosLookup("cpf")) {
+      const caminho = modelo.replace("{cpf}", encodeURIComponent(cpf)).replace("{email}", "");
+      if (await buscarRegistro(token, caminho)) {
+        campos.push("CPF");
+        break;
       }
-    } catch {
-      continue;
     }
   }
-  return { existe: false };
+  if (email) {
+    for (const modelo of caminhosLookup("email")) {
+      const caminho = modelo.replace("{email}", encodeURIComponent(email)).replace("{cpf}", "");
+      if (await buscarRegistro(token, caminho)) {
+        campos.push("e-mail");
+        break;
+      }
+    }
+  }
+  if (!campos.length) return { existe: false, campos: [] };
+  return { existe: true, campos, campo: campos.join(" e ") };
 };
 
 const extrairCodigoRevendedora = (corpo) => {
@@ -398,6 +421,68 @@ const chamarIndico = async (req, pathname, payload) => {
   return { resposta, corpo };
 };
 
+const generoIndico = (gender) => {
+  if (Number(gender) === 1) return "female";
+  if (Number(gender) === 2) return "male";
+  return "prefer_not_to_say";
+};
+
+const dataNascimentoIndico = (birthday) => {
+  const texto = String(birthday || "");
+  if (/^\d{4}-\d{2}-\d{2}/.test(texto)) return texto.slice(0, 10);
+  const data = new Date(texto);
+  if (Number.isNaN(data.getTime())) return "";
+  return data.toISOString().slice(0, 10);
+};
+
+const montarLeadIndico = (dados, captchaToken, extras = {}) => {
+  const lead = {
+    captcha_token: captchaToken,
+    full_name: dados.nome,
+    email: dados.email,
+    document: dados.cpf,
+    document_type: "cpf",
+    phone: dados.telefone,
+    whatsapp: dados.telefone,
+    zip_code: dados.zipCode,
+    street: dados.rua,
+    street_number: dados.addressNumber,
+    neighborhood: dados.bairro,
+    city: dados.cidade,
+    state: dados.uf,
+    country: "BR",
+    accept_terms: Boolean(dados.acceptTerms),
+    contact_authorization: Boolean(dados.acceptTerms)
+  };
+  const nascimento = dataNascimentoIndico(dados.birthday);
+  if (nascimento) lead.birth_date = nascimento;
+  if (dados.gender) lead.gender = generoIndico(dados.gender);
+  if (dados.complemento) lead.complement = dados.complemento;
+  if (dados.referencia) lead.message = dados.referencia;
+  if (extras.landing_page_url) lead.landing_page_url = extras.landing_page_url;
+  if (extras.referrer) lead.referrer = extras.referrer;
+  return lead;
+};
+
+const enviarLeadIndico = async (req, dados, captchaToken, extras = {}) => {
+  if (!captchaToken) {
+    const erro = new Error("Faltou o captcha para gravar o lead.");
+    erro.status = 400;
+    throw erro;
+  }
+  const { resposta, corpo } = await chamarIndico(
+    req,
+    "/api/v1/leads",
+    montarLeadIndico(dados, captchaToken, extras)
+  );
+  if (!resposta.ok && resposta.status !== 202) {
+    const erro = new Error(mensagemOtp(corpo, resposta.status) || "Não foi possível gravar o lead.");
+    erro.status = resposta.status;
+    throw erro;
+  }
+  return corpo;
+};
+
 const mensagemOtp = (corpo, status) => {
   const erro = String(corpo?.error || "").toLowerCase();
   if (erro.includes("invalid captcha")) return "Não foi possível validar o captcha. Recarregue a página e tente de novo.";
@@ -442,24 +527,36 @@ app.get("/api/config", (_req, res) => {
 app.post("/api/verificar", async (req, res) => {
   const email = String(req.body?.email || "").trim().toLowerCase();
   const cpf = soDigitos(req.body?.cpf);
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || cpf.length !== 11) {
-    return res.status(400).json({ ok: false, message: "Informe um CPF e um e-mail válidos." });
+  const emailOk = Boolean(email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const cpfOk = cpf.length === 11;
+  if (!emailOk && !cpfOk) {
+    return res.status(400).json({ ok: false, message: "Informe um CPF ou um e-mail válidos." });
+  }
+  if (email && !emailOk) {
+    return res.status(400).json({ ok: false, message: "Informe um e-mail válido." });
+  }
+  if (cpf && !cpfOk) {
+    return res.status(400).json({ ok: false, message: "Informe um CPF válido." });
   }
   if (!BASE_URL) {
     return res.status(503).json({ ok: false, message: "A URL da API Gera ainda não foi configurada." });
   }
   try {
     const token = await obterToken();
-    const consulta = await consultarExistencia(token, { cpf, email });
+    const consulta = await consultarExistencia(token, {
+      cpf: cpfOk ? cpf : "",
+      email: emailOk ? email : ""
+    });
     if (consulta.existe) {
       return res.json({
         ok: false,
         existe: true,
         campo: consulta.campo,
+        campos: consulta.campos,
         message: `Já existe um cadastro com este ${consulta.campo}. Entre no Escritório Virtual.`
       });
     }
-    return res.json({ ok: true, existe: false });
+    return res.json({ ok: true, existe: false, campos: [] });
   } catch (erro) {
     return res.status(502).json({
       ok: false,
@@ -530,6 +627,35 @@ app.post("/api/otp/validar", async (req, res) => {
   }
 });
 
+app.post("/api/lead", async (req, res) => {
+  const validacao = validarPayload(req.body || {});
+  if (validacao.erro) {
+    return res.status(400).json({ ok: false, message: validacao.erro });
+  }
+  if (!emailFoiVerificado(validacao.dados.email)) {
+    return res.status(403).json({
+      ok: false,
+      message: "Confirme o código enviado por e-mail antes de gravar o lead."
+    });
+  }
+  const captchaToken = String(req.body?.captcha_token || "").trim();
+  if (!captchaToken) {
+    return res.status(400).json({ ok: false, message: "Faltou o captcha. Recarregue a página e tente de novo." });
+  }
+  try {
+    await enviarLeadIndico(req, validacao.dados, captchaToken, {
+      landing_page_url: String(req.body?.landing_page_url || "").trim(),
+      referrer: String(req.body?.referrer || "").trim()
+    });
+    return res.status(202).json({ ok: true, message: "Lead gravado." });
+  } catch (erro) {
+    return res.status(erro.status || 502).json({
+      ok: false,
+      message: erro.message || "Não foi possível gravar o lead."
+    });
+  }
+});
+
 app.post("/api/cadastro", async (req, res) => {
   const validacao = validarPayload(req.body || {});
   if (validacao.erro) {
@@ -558,6 +684,7 @@ app.post("/api/cadastro", async (req, res) => {
         ok: false,
         existe: true,
         campo: consulta.campo,
+        campos: consulta.campos,
         message: `Já existe um cadastro com este ${consulta.campo}. Entre no Escritório Virtual.`
       });
     }

@@ -13,6 +13,7 @@ O formulário chama rotas no mesmo domínio:
 - `POST /api/verificar`
 - `POST /api/otp/gerar`
 - `POST /api/otp/validar`
+- `POST /api/lead`
 - `POST /api/cadastro`
 
 Essas rotas existem apenas no servidor Node (`api/server.js`). Se o host servir só arquivo estático (Firebase Hosting, GCS, nginx só de HTML), o navegador recebe **404 HTML** em `/api/verificar` — isso **não** significa “cadastro não existe na Gera”.
@@ -104,7 +105,8 @@ Em produção: `https://querorevender.loccitaneaubresil.com` (ou o domínio fina
    - Não existe → segue.
 3. `POST /api/otp/gerar` envia o código de 6 dígitos (Indico).
 4. `POST /api/otp/validar` confere o PIN.
-5. `POST /api/cadastro` cria o revendedor na Gera, gera uma senha `Locci@` e mostra usuário/senha na tela de confirmação.
+5. `POST /api/lead` grava o lead no destino Indico (`POST /api/v1/leads`).
+6. `POST /api/cadastro` cria o revendedor na Gera, gera uma senha `Locci@` e mostra usuário/senha na tela de confirmação.
 
 ## Local
 

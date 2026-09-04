@@ -593,6 +593,18 @@
       background: #E8F6EE;
       color: #1F6B3A;
     }
+    .form__aviso {
+      margin: 0 0 1.1rem;
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      background: #FDECEE;
+      color: #96121F;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+    .form__aviso[hidden] { display: none; }
+    .form__aviso strong { display: block; margin-bottom: 0.25rem; }
+    .form__aviso .btn { margin-top: 0.75rem; }
     .form__step { display: none; }
     .form[data-step="dados"] .form__step--dados,
     .form[data-step="existe"] .form__step--existe,
@@ -1494,7 +1506,8 @@
                 <input type="text" name="nome" required autocomplete="name" placeholder="Seu nome" />
               </label>
               <label class="full">E-mail
-                <input id="lead-email" type="email" name="email" required autocomplete="email" placeholder="voce@email.com" />
+                <input id="lead-email" type="email" name="email" required autocomplete="email" placeholder="voce@email.com" aria-describedby="lead-email-msg" />
+                <span class="form__field-msg" id="lead-email-msg" role="alert"></span>
               </label>
               <label class="full">Confirme o e-mail
                 <input id="lead-email-confirma" type="email" name="email_confirmacao" required autocomplete="off" spellcheck="false" placeholder="Digite o e-mail de novo, sem colar" />
@@ -1576,13 +1589,17 @@
               <input id="lead-termos" type="checkbox" name="aceite_termos" required />
               <span>Li e aceito os termos do programa de revenda L'Occitane au Brésil.</span>
             </label>
+            <div class="form__aviso" id="lead-existe-aviso" hidden>
+              <strong>Este CPF ou e-mail já está cadastrado.</strong>
+              <span id="lead-existe-msg">Entre no Escritório Virtual para acessar sua conta.</span>
+              <a class="btn" id="lead-ir-gera" href="https://revendedor.loccitaneaubresil.com/" target="_blank" rel="noopener">Entrar no Escritório Virtual</a>
+            </div>
             <button class="btn" id="lead-submit" type="submit">Quero começar a vender</button>
             <p class="form__note">Validamos CEP, e-mail e CPF. Se estiver tudo certo, enviamos um código para o seu e-mail.</p>
           </div>
 
           <div class="form__step form__step--existe">
             <div class="form__actions">
-              <a class="btn" id="lead-ir-gera" href="https://revendedor.loccitaneaubresil.com/" target="_blank" rel="noopener">Entrar no Escritório Virtual</a>
               <button class="btn btn--ghost" id="lead-voltar-existe" type="button">Voltar ao formulário</button>
             </div>
           </div>
@@ -1965,6 +1982,9 @@
 
     const soDigitos = (valor) => String(valor || "").replace(/\D/g, "");
     const normalizarEmail = (valor) => valor.trim().toLowerCase();
+    const MSG_EMAIL_EXISTE = "Este e-mail já está cadastrado.";
+    const MSG_CPF_EXISTE = "Este CPF já está cadastrado.";
+    const emailMsg = document.getElementById("lead-email-msg");
 
     const mostrarStatus = (tipo, html) => {
       statusBox.className = `form__status is-visible is-${tipo}`;
@@ -1975,7 +1995,16 @@
       statusBox.textContent = "";
     };
 
+    const mostrarErroEmail = (mensagem) => {
+      emailInput.classList.toggle("is-invalid", Boolean(mensagem));
+      emailInput.setAttribute("aria-invalid", mensagem ? "true" : "false");
+      emailMsg.textContent = mensagem;
+      emailMsg.classList.toggle("is-visible", Boolean(mensagem));
+      emailInput.setCustomValidity(mensagem === MSG_EMAIL_EXISTE ? MSG_EMAIL_EXISTE : "");
+    };
+
     const validarEmails = () => {
+      if (emailMsg.textContent === MSG_EMAIL_EXISTE) return;
       if (!emailConfirmaInput.value || !emailInput.checkValidity()) {
         emailConfirmaInput.setCustomValidity("");
         return;
@@ -1985,8 +2014,20 @@
     };
 
     [emailInput, emailConfirmaInput].forEach((campo) => {
-      campo.addEventListener("input", () => emailConfirmaInput.setCustomValidity(""));
+      campo.addEventListener("input", () => {
+        emailConfirmaInput.setCustomValidity("");
+        if (emailMsg.textContent === MSG_EMAIL_EXISTE) {
+          mostrarErroEmail("");
+          limparAvisoExistente();
+        }
+      });
       campo.addEventListener("blur", validarEmails);
+    });
+    emailConfirmaInput.addEventListener("blur", async () => {
+      validarEmails();
+      if (!emailInput.checkValidity() || !emailConfirmaInput.value) return;
+      if (normalizarEmail(emailInput.value) !== normalizarEmail(emailConfirmaInput.value)) return;
+      await consultarExistenciaCampo({ email: normalizarEmail(emailInput.value) });
     });
 
     const bloquearAtalho = (event, tecla) => {
@@ -2057,12 +2098,12 @@
       if (!valor || !cpfValido(valor)) return "CPF inválido";
       return "";
     };
-    const mostrarErroCpf = (mensagem) => {
+    const mostrarErroCpf = (mensagem, { nativo = true } = {}) => {
       cpfInput.classList.toggle("is-invalid", Boolean(mensagem));
       cpfInput.setAttribute("aria-invalid", mensagem ? "true" : "false");
       cpfMsg.textContent = mensagem;
       cpfMsg.classList.toggle("is-visible", Boolean(mensagem));
-      cpfInput.setCustomValidity(mensagem);
+      cpfInput.setCustomValidity(nativo ? mensagem : "");
     };
     const validarCpf = ({ exigirPreenchido = false } = {}) => {
       if (!cpfInput.value && !exigirPreenchido) {
@@ -2095,8 +2136,12 @@
     cpfInput.addEventListener("input", () => {
       cpfInput.value = mascararCpf(cpfInput.value);
       mostrarErroCpf("");
+      limparAvisoExistente();
     });
-    cpfInput.addEventListener("blur", () => validarCpf());
+    cpfInput.addEventListener("blur", async () => {
+      if (!validarCpf()) return;
+      await consultarExistenciaCampo({ cpf: soDigitos(cpfInput.value) });
+    });
 
     telefoneInput.addEventListener("input", () => {
       telefoneInput.value = mascararTelefone(telefoneInput.value);
@@ -2232,13 +2277,47 @@
       return grecaptcha.execute(recaptchaSiteKey, { action });
     };
 
-    const mostrarExistente = (mensagem) => {
-      irParaPasso("existe", {
-        titulo: "Você já tem cadastro",
-        intro: mensagem || "Este CPF ou e-mail já está na L'Occitane au Brésil."
+    let cadastroJaExiste = false;
+
+    const limparAvisoExistente = () => {
+      cadastroJaExiste = false;
+      const aviso = document.getElementById("lead-existe-aviso");
+      if (aviso) aviso.hidden = true;
+    };
+
+    const marcarCamposExistentes = (campos = []) => {
+      const lista = Array.isArray(campos) ? campos : [];
+      if (lista.includes("e-mail")) mostrarErroEmail(MSG_EMAIL_EXISTE);
+      if (lista.includes("CPF")) mostrarErroCpf(MSG_CPF_EXISTE, { nativo: true });
+    };
+
+    const consultarExistenciaCampo = async (body) => {
+      try {
+        const { data } = await chamarApi("/api/verificar", body);
+        if (data.existe) {
+          mostrarExistente(data.message, data.campos);
+        }
+        return data;
+      } catch {
+        return { existe: false };
+      }
+    };
+
+    const mostrarExistente = (mensagem, campos) => {
+      cadastroJaExiste = true;
+      marcarCamposExistentes(campos);
+      const aviso = document.getElementById("lead-existe-aviso");
+      const texto = document.getElementById("lead-existe-msg");
+      if (texto) texto.textContent = mensagem || "Entre no Escritório Virtual para acessar sua conta.";
+      if (aviso) aviso.hidden = false;
+      irParaPasso("dados", {
+        titulo: "Cadastro grátis",
+        intro: "Leva menos de 2 minutos. Depois é só escolher os produtos e vender."
       });
       mostrarStatus("error", mensagem || "Já existe um cadastro com este CPF ou e-mail.");
-      document.getElementById("lead-ir-gera").href = escritorioUrl;
+      const irGera = document.getElementById("lead-ir-gera");
+      if (irGera) irGera.href = escritorioUrl;
+      aviso?.scrollIntoView({ behavior: "smooth", block: "center" });
     };
 
     const iniciarCooldown = () => {
@@ -2260,6 +2339,9 @@
     };
 
     const enviarCodigo = async () => {
+      if (cadastroJaExiste) {
+        throw new Error("Este CPF ou e-mail já está cadastrado. Entre no Escritório Virtual.");
+      }
       const captchaToken = await obterCaptcha("lead");
       const { resposta, data } = await chamarApi("/api/otp/gerar", {
         email: payloadAtual.email,
@@ -2273,6 +2355,7 @@
     };
 
     const mostrarCodigo = (mensagem) => {
+      if (cadastroJaExiste) return;
       irParaPasso("codigo", {
         titulo: "Confirme seu e-mail",
         intro: `Enviamos um código de 6 dígitos para ${payloadAtual.email}.`
@@ -2285,7 +2368,7 @@
     const concluirCadastro = async () => {
       const { resposta, data } = await chamarApi("/api/cadastro", payloadAtual);
       if (data.existe) {
-        mostrarExistente(data.message);
+        mostrarExistente(data.message, data.campos);
         return;
       }
       if (!resposta.ok || !data.ok) {
@@ -2330,6 +2413,16 @@
       validarEmails();
       validarNascimento();
       validarCep();
+      if (cadastroJaExiste || emailMsg.textContent === MSG_EMAIL_EXISTE || cpfMsg.textContent === MSG_CPF_EXISTE) {
+        const campos = [];
+        if (cpfMsg.textContent === MSG_CPF_EXISTE) campos.push("CPF");
+        if (emailMsg.textContent === MSG_EMAIL_EXISTE) campos.push("e-mail");
+        mostrarExistente(
+          `Já existe um cadastro com este ${campos.join(" e ") || "CPF ou e-mail"}. Entre no Escritório Virtual.`,
+          campos
+        );
+        return;
+      }
       if (!form.checkValidity()) {
         form.reportValidity();
         return;
@@ -2344,16 +2437,21 @@
           email: payloadAtual.email,
           cpf: payloadAtual.cpf
         });
-        if (data.existe) {
-          mostrarExistente(data.message);
+        if (data.existe || cadastroJaExiste) {
+          mostrarExistente(data.message, data.campos);
           return;
         }
         if (!resposta.ok || !data.ok) {
           mostrarStatus("error", data.message || "Não foi possível consultar o cadastro.");
           return;
         }
+        if (cadastroJaExiste) {
+          mostrarExistente("Já existe um cadastro com este CPF ou e-mail. Entre no Escritório Virtual.");
+          return;
+        }
         submitBtn.textContent = "Enviando código...";
         const enviado = await enviarCodigo();
+        if (cadastroJaExiste) return;
         mostrarCodigo(enviado.message);
       } catch (erro) {
         mostrarStatus("error", erro.message || "Sem conexão com o servidor de cadastro. Abra a página em http://localhost:3000.");
@@ -2385,6 +2483,17 @@
         if (!resposta.ok || !data.ok) {
           mostrarStatus("error", data.message || "Código inválido. Você pode reenviar ou voltar ao formulário.");
           return;
+        }
+        validarOtpBtn.textContent = "Salvando seus dados...";
+        const captchaLead = await obterCaptcha("lead");
+        const lead = await chamarApi("/api/lead", {
+          ...payloadAtual,
+          captcha_token: captchaLead,
+          landing_page_url: window.location.href,
+          referrer: document.referrer || ""
+        });
+        if (!lead.resposta.ok || !lead.data.ok) {
+          throw new Error(lead.data.message || "Não foi possível gravar o lead.");
         }
         validarOtpBtn.textContent = "Criando cadastro...";
         await concluirCadastro();
@@ -2440,7 +2549,11 @@
     document.getElementById("lead-voltar-existe").addEventListener("click", voltarAoFormulario);
     document.getElementById("lead-voltar-codigo").addEventListener("click", voltarAoFormulario);
 
-    if (new URLSearchParams(window.location.search).get("preview") === "sucesso") {
+    const preview = new URLSearchParams(window.location.search).get("preview");
+    if (preview === "existe") {
+      mostrarExistente("Já existe um cadastro com este e-mail. Entre no Escritório Virtual.", ["e-mail"]);
+    }
+    if (preview === "sucesso") {
       document.getElementById("lead-login").textContent = "maria.silva@gmail.com";
       document.getElementById("lead-senha").textContent = "Locci@Ab3$xY";
       document.getElementById("lead-codigo-box").style.display = "none";
