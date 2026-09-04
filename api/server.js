@@ -8,7 +8,7 @@ const BASE_URL = String(process.env.GERA_BASE_URL || "").replace(/\/$/, "");
 const TOKEN_PATH = process.env.GERA_TOKEN_PATH || "/token";
 const SELLERS_PATH = process.env.GERA_SELLERS_PATH || "/api/Public/Sellers";
 const ZIPCODE_PATH = process.env.GERA_ZIPCODE_PATH || "/api/Public/GeographicalStructures?postalCode={cep}";
-const DOCUMENT_TYPE_CPF = process.env.GERA_DOCUMENT_TYPE_CPF || "1";
+const DOCUMENT_TYPE_CPF = process.env.GERA_DOCUMENT_TYPE_CPF || "2";
 const INDICATOR_CODE = process.env.GERA_INDICATOR_CODE || "2315";
 const REGISTRATION_ORIGIN = process.env.GERA_REGISTRATION_ORIGIN || "";
 const SENHA_PREFIXO = "Locci@";
@@ -35,6 +35,12 @@ const lerJsonSeguro = async (resposta) => {
 
 const extrairMensagem = (corpo) => {
   if (!corpo || typeof corpo !== "object") return "";
+  if (Array.isArray(corpo)) {
+    return corpo
+      .map((item) => (typeof item === "string" ? item : item?.message || item?.errorMessage || item?.exceptionMessage || ""))
+      .filter(Boolean)
+      .join(" ");
+  }
   if (typeof corpo.message === "string" && corpo.message.trim()) return corpo.message;
   if (typeof corpo.exceptionMessage === "string") return corpo.exceptionMessage;
   if (typeof corpo.error_description === "string") return corpo.error_description;
@@ -274,15 +280,14 @@ const INDICO_OTP_PURPOSE = process.env.INDICO_OTP_PURPOSE || "registration";
 const INDICO_ORIGIN = process.env.INDICO_ORIGIN || "http://localhost:3000";
 const RECAPTCHA_SITE_KEY = process.env.RECAPTCHA_SITE_KEY || "";
 const LOOKUP_PATHS = String(process.env.GERA_LOOKUP_PATHS || [
+  "/api/public/validateNewRegisterDocument?value={cpf}&type=2",
   "/api/public/validateNewRegisterDocument?value={cpf}&type=1",
+  "/api/public/people?document={cpf}&typeDocument=2",
   "/api/public/people?document={cpf}&typeDocument=1",
-  "/api/public/people?document={cpf}",
   "/api/public/people?email={email}",
-  "/api/IndirectSales/personSearch?document={cpf}&documentType=1",
-  "/api/IndirectSales/personSearch?email={email}",
-  "/api/people?document={cpf}",
-  "/api/sellers?document={cpf}",
-  "/api/sellers?email={email}"
+  "/api/people?document={cpf}&includeOptions=documents&includeOptions=emails",
+  "/api/sellers?functionCode=1&document={cpf}&includeOptions=documents&includeOptions=emails",
+  "/api/sellers?functionCode=1&email={email}&includeOptions=emails"
 ].join(",")).split(",").map((item) => item.trim()).filter(Boolean);
 const SELLER_GET_PATH = process.env.GERA_SELLER_GET_PATH || "/api/Public/Sellers/{code}";
 const OTP_DEV_REVEAL = String(process.env.OTP_DEV_REVEAL || "") === "1";
@@ -343,10 +348,32 @@ const listarRegistros = (corpo) => {
   return [];
 };
 
+const numeroDocumento = (item) => {
+  if (!item || typeof item !== "object") return "";
+  if (Array.isArray(item.document)) {
+    const cpf = item.document.find((doc) => soDigitos(doc?.document || doc?.number || "").length === 11);
+    return soDigitos((cpf || item.document[0])?.document || (cpf || item.document[0])?.number || "");
+  }
+  if (item.document && typeof item.document === "object") {
+    return soDigitos(item.document.document || item.document.number || item.document.value || "");
+  }
+  return soDigitos(item.mainDocument || item.document || item.cpf || item.identification || "");
+};
+
+const emailRegistro = (item) => {
+  if (!item || typeof item !== "object") return "";
+  if (typeof item.email === "string") return item.email.trim().toLowerCase();
+  if (Array.isArray(item.emails) && item.emails[0]) {
+    const primeiro = item.emails[0];
+    return String(primeiro.email || primeiro.address || primeiro).trim().toLowerCase();
+  }
+  return String(item.mail || "").trim().toLowerCase();
+};
+
 const registroBateConsulta = (item, { cpf, email }) => {
   if (!item || typeof item !== "object") return false;
-  const doc = soDigitos(item.mainDocument || item.document || item.cpf || item.identification || "");
-  const mail = String(item.email || item.mail || "").trim().toLowerCase();
+  const doc = numeroDocumento(item);
+  const mail = emailRegistro(item);
   if (cpf && doc === cpf) return true;
   if (email && mail && mail === email) return true;
   return false;
