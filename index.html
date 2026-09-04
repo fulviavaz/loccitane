@@ -551,7 +551,7 @@
       text-transform: uppercase;
       color: var(--red);
     }
-    .form__check {
+    .form label.form__check {
       grid-column: 1 / -1;
       display: flex;
       align-items: flex-start;
@@ -559,16 +559,21 @@
       margin-bottom: 1rem;
       font-size: 0.82rem;
       font-weight: 500;
+      letter-spacing: 0;
       color: var(--muted);
       line-height: 1.45;
     }
-    .form__check input {
+    .form label.form__check input {
       width: 1.15rem;
       min-height: 1.15rem;
+      height: 1.15rem;
       margin-top: 0.15rem;
       padding: 0;
       accent-color: var(--red);
       flex-shrink: 0;
+    }
+    .form label.form__check span {
+      min-width: 0;
     }
     .form .btn { width: 100%; margin-top: 0.35rem; }
     .form .btn:disabled {
@@ -605,6 +610,23 @@
     .form__aviso[hidden] { display: none; }
     .form__aviso strong { display: block; margin-bottom: 0.25rem; }
     .form__aviso .btn { margin-top: 0.75rem; }
+    .form__otp-dev {
+      margin: 0 0 1rem;
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      background: #F7EFE6;
+      color: #3B2A22;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+    .form__otp-dev[hidden] { display: none; }
+    .form__otp-dev strong {
+      display: block;
+      margin-top: 0.35rem;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.28em;
+    }
     .form__step { display: none; }
     .form[data-step="dados"] .form__step--dados,
     .form[data-step="existe"] .form__step--existe,
@@ -1605,6 +1627,10 @@
           </div>
 
           <div class="form__step form__step--codigo">
+            <div class="form__otp-dev" id="lead-otp-dev" hidden>
+              O e-mail da Indico pode atrasar. Em teste, use este código:
+              <strong id="lead-otp-dev-code"></strong>
+            </div>
             <label class="full">Código de 6 dígitos
               <input id="lead-otp" type="text" name="codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" />
             </label>
@@ -2018,7 +2044,7 @@
         emailConfirmaInput.setCustomValidity("");
         if (emailMsg.textContent === MSG_EMAIL_EXISTE) {
           mostrarErroEmail("");
-          limparAvisoExistente();
+          sincronizarAvisoExistente();
         }
       });
       campo.addEventListener("blur", validarEmails);
@@ -2136,7 +2162,7 @@
     cpfInput.addEventListener("input", () => {
       cpfInput.value = mascararCpf(cpfInput.value);
       mostrarErroCpf("");
-      limparAvisoExistente();
+      sincronizarAvisoExistente();
     });
     cpfInput.addEventListener("blur", async () => {
       if (!validarCpf()) return;
@@ -2279,6 +2305,14 @@
 
     let cadastroJaExiste = false;
 
+    const sincronizarAvisoExistente = () => {
+      const emailExiste = emailMsg.textContent === MSG_EMAIL_EXISTE;
+      const cpfExiste = cpfMsg.textContent === MSG_CPF_EXISTE;
+      cadastroJaExiste = emailExiste || cpfExiste;
+      const aviso = document.getElementById("lead-existe-aviso");
+      if (!cadastroJaExiste && aviso) aviso.hidden = true;
+    };
+
     const limparAvisoExistente = () => {
       cadastroJaExiste = false;
       const aviso = document.getElementById("lead-existe-aviso");
@@ -2293,13 +2327,17 @@
 
     const consultarExistenciaCampo = async (body) => {
       try {
-        const { data } = await chamarApi("/api/verificar", body);
+        const { resposta, data } = await chamarApi("/api/verificar", body);
         if (data.existe) {
           mostrarExistente(data.message, data.campos);
+          return data;
+        }
+        if (!resposta.ok || data.ok === false) {
+          return { existe: false, falhou: true, message: data.message };
         }
         return data;
       } catch {
-        return { existe: false };
+        return { existe: false, falhou: true };
       }
     };
 
@@ -2354,12 +2392,26 @@
       return data;
     };
 
-    const mostrarCodigo = (mensagem) => {
+    const mostrarDevCode = (devCode) => {
+      const caixa = document.getElementById("lead-otp-dev");
+      const valor = document.getElementById("lead-otp-dev-code");
+      if (!caixa || !valor) return;
+      if (devCode) {
+        valor.textContent = devCode;
+        caixa.hidden = false;
+      } else {
+        valor.textContent = "";
+        caixa.hidden = true;
+      }
+    };
+
+    const mostrarCodigo = (mensagem, devCode) => {
       if (cadastroJaExiste) return;
       irParaPasso("codigo", {
         titulo: "Confirme seu e-mail",
         intro: `Enviamos um código de 6 dígitos para ${payloadAtual.email}.`
       });
+      mostrarDevCode(devCode);
       mostrarStatus("success", mensagem || "Código enviado. Confira sua caixa de entrada.");
       otpInput.value = "";
       otpInput.focus();
@@ -2442,7 +2494,7 @@
           return;
         }
         if (!resposta.ok || !data.ok) {
-          mostrarStatus("error", data.message || "Não foi possível consultar o cadastro.");
+          mostrarStatus("error", data.message || "Não foi possível consultar o cadastro. O código não foi enviado.");
           return;
         }
         if (cadastroJaExiste) {
@@ -2452,7 +2504,11 @@
         submitBtn.textContent = "Enviando código...";
         const enviado = await enviarCodigo();
         if (cadastroJaExiste) return;
-        mostrarCodigo(enviado.message);
+        if (!enviado || !enviado.ok) {
+          mostrarStatus("error", enviado?.message || "Não foi possível enviar o código. Fique nesta tela e tente de novo.");
+          return;
+        }
+        mostrarCodigo(enviado.message, enviado.devCode);
       } catch (erro) {
         mostrarStatus("error", erro.message || "Sem conexão com o servidor de cadastro. Abra a página em http://localhost:3000.");
       } finally {
@@ -2486,11 +2542,17 @@
         }
         validarOtpBtn.textContent = "Salvando seus dados...";
         const captchaLead = await obterCaptcha("lead");
+        const utm = new URLSearchParams(window.location.search);
         const lead = await chamarApi("/api/lead", {
           ...payloadAtual,
           captcha_token: captchaLead,
           landing_page_url: window.location.href,
-          referrer: document.referrer || ""
+          referrer: document.referrer || "",
+          utm_source: utm.get("utm_source") || "",
+          utm_medium: utm.get("utm_medium") || "",
+          utm_campaign: utm.get("utm_campaign") || "",
+          utm_term: utm.get("utm_term") || "",
+          utm_content: utm.get("utm_content") || ""
         });
         if (!lead.resposta.ok || !lead.data.ok) {
           throw new Error(lead.data.message || "Não foi possível gravar o lead.");
@@ -2531,6 +2593,7 @@
       reenviarOtpBtn.disabled = true;
       try {
         const enviado = await enviarCodigo();
+        mostrarDevCode(enviado.devCode);
         mostrarStatus("success", enviado.message || "Enviamos um código novo.");
       } catch (erro) {
         mostrarStatus("error", erro.message || "Não foi possível reenviar o código.");
@@ -2552,6 +2615,10 @@
     const preview = new URLSearchParams(window.location.search).get("preview");
     if (preview === "existe") {
       mostrarExistente("Já existe um cadastro com este e-mail. Entre no Escritório Virtual.", ["e-mail"]);
+    }
+    if (preview === "codigo") {
+      payloadAtual = { email: "maria.silva@gmail.com" };
+      mostrarCodigo("Se o e-mail não chegou, use o código de teste na tela.", "482193");
     }
     if (preview === "sucesso") {
       document.getElementById("lead-login").textContent = "maria.silva@gmail.com";

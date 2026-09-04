@@ -274,15 +274,20 @@ const INDICO_OTP_PURPOSE = process.env.INDICO_OTP_PURPOSE || "registration";
 const INDICO_ORIGIN = process.env.INDICO_ORIGIN || "http://localhost:3000";
 const RECAPTCHA_SITE_KEY = process.env.RECAPTCHA_SITE_KEY || "";
 const LOOKUP_PATHS = String(process.env.GERA_LOOKUP_PATHS || [
-  "/api/Public/People?mainDocument={cpf}",
-  "/api/Public/People?mainDocument={cpf}&mainDocumentTypeId=1",
-  "/api/Public/People?email={email}",
-  "/api/Public/Sellers?mainDocument={cpf}",
-  "/api/Public/Sellers?mainDocument={cpf}&mainDocumentTypeId=1",
-  "/api/Public/Sellers?email={email}"
+  "/api/public/validateNewRegisterDocument?value={cpf}&type=1",
+  "/api/public/people?document={cpf}&typeDocument=1",
+  "/api/public/people?document={cpf}",
+  "/api/public/people?email={email}",
+  "/api/IndirectSales/personSearch?document={cpf}&documentType=1",
+  "/api/IndirectSales/personSearch?email={email}",
+  "/api/people?document={cpf}",
+  "/api/sellers?document={cpf}",
+  "/api/sellers?email={email}"
 ].join(",")).split(",").map((item) => item.trim()).filter(Boolean);
 const SELLER_GET_PATH = process.env.GERA_SELLER_GET_PATH || "/api/Public/Sellers/{code}";
+const OTP_DEV_REVEAL = String(process.env.OTP_DEV_REVEAL || "") === "1";
 const emailsVerificados = new Map();
+const otpLocais = new Map();
 
 const marcarEmailVerificado = (email) => {
   emailsVerificados.set(email, Date.now() + 15 * 60 * 1000);
@@ -297,60 +302,155 @@ const emailFoiVerificado = (email) => {
   return true;
 };
 
-const temRegistro = (corpo) => {
-  if (corpo == null) return false;
-  if (Array.isArray(corpo)) return corpo.length > 0;
-  if (typeof corpo !== "object") return false;
+const deveRevelarOtp = () => OTP_DEV_REVEAL;
+
+const gerarOtpLocal = (email) => {
+  const code = String(crypto.randomInt(0, 1_000_000)).padStart(6, "0");
+  otpLocais.set(email, {
+    hash: crypto.createHash("sha256").update(code).digest("hex"),
+    expires: Date.now() + 10 * 60 * 1000,
+    tentativas: 0
+  });
+  return code;
+};
+
+const validarOtpLocal = (email, code) => {
+  const item = otpLocais.get(email);
+  if (!item) return false;
+  if (Date.now() > item.expires || item.tentativas >= 5) {
+    otpLocais.delete(email);
+    return false;
+  }
+  item.tentativas += 1;
+  const hash = crypto.createHash("sha256").update(soDigitos(code)).digest("hex");
+  if (hash !== item.hash) return false;
+  otpLocais.delete(email);
+  return true;
+};
+
+const MENSAGEM_JA_EXISTE = /already registered|already exists|já cadastr|ja cadastr|já existe|ja existe|duplicad|em uso|in use|already in use/;
+
+const listarRegistros = (corpo) => {
+  if (Array.isArray(corpo)) return corpo.filter((item) => item && typeof item === "object");
+  if (!corpo || typeof corpo !== "object") return [];
   const listas = [corpo.items, corpo.data, corpo.results, corpo.value, corpo.result, corpo.people, corpo.sellers];
-  if (listas.some((lista) => Array.isArray(lista) && lista.length > 0)) return true;
-  if (Number(corpo.totalCount || corpo.total || corpo.count) > 0) return true;
-  return Boolean(
-    corpo.id
-    || corpo.code
-    || corpo.personCode
-    || corpo.sellerCode
-    || corpo.personId
-    || corpo.mainDocument
-    || corpo.email
-  );
+  for (const lista of listas) {
+    if (Array.isArray(lista)) return lista.filter((item) => item && typeof item === "object");
+  }
+  if (corpo.id || corpo.code || corpo.personCode || corpo.sellerCode || corpo.personId || corpo.mainDocument || corpo.name) {
+    return [corpo];
+  }
+  return [];
+};
+
+const registroBateConsulta = (item, { cpf, email }) => {
+  if (!item || typeof item !== "object") return false;
+  const doc = soDigitos(item.mainDocument || item.document || item.cpf || item.identification || "");
+  const mail = String(item.email || item.mail || "").trim().toLowerCase();
+  if (cpf && doc === cpf) return true;
+  if (email && mail && mail === email) return true;
+  return false;
+};
+
+const corpoIndicaExistencia = (corpo, consulta = {}) => {
+  if (corpo == null) return false;
+  if (corpo === true) return true;
+  if (corpo === false) return false;
+  if (typeof corpo !== "object") return false;
+  if (corpo.isValid === true || corpo.valid === true || corpo.canRegister === true || corpo.available === true) {
+    return false;
+  }
+  if (corpo.isValid === false || corpo.valid === false || corpo.canRegister === false || corpo.available === false) {
+    return true;
+  }
+  const flags = [
+    corpo.exists,
+    corpo.exist,
+    corpo.alreadyExists,
+    corpo.alreadyRegistered,
+    corpo.isRegistered,
+    corpo.registered,
+    corpo.hasRegister,
+    corpo.hasRegistration,
+    corpo.documentExists,
+    corpo.emailExists,
+    corpo.personExists,
+    corpo.isDuplicated,
+    corpo.duplicated,
+    corpo.inUse,
+    corpo.found
+  ];
+  if (flags.some((flag) => flag === true)) return true;
+  if (corpo.document === true || corpo.email === true) return true;
+  const texto = String(corpo.message || corpo.exceptionMessage || corpo.error || "").toLowerCase();
+  if (MENSAGEM_JA_EXISTE.test(texto)) return true;
+  return listarRegistros(corpo).some((item) => registroBateConsulta(item, consulta));
 };
 
 const caminhosLookup = (tipo) => LOOKUP_PATHS.filter((modelo) => (
   tipo === "cpf" ? /\{cpf\}|document|cpf/i.test(modelo) : /\{email\}|email/i.test(modelo)
 ));
 
-const buscarRegistro = async (token, caminho) => {
+const buscarRegistro = async (token, caminho, consulta = {}) => {
   try {
     const resposta = await fetch(joinUrl(BASE_URL, caminho), {
       headers: { Authorization: `Bearer ${token}` }
     });
-    if (resposta.status === 404 || resposta.status === 204) return false;
-    if (!resposta.ok) return false;
-    return temRegistro(await lerJsonSeguro(resposta));
-  } catch {
-    return false;
+    const corpo = await lerJsonSeguro(resposta);
+    const texto = extrairMensagem(corpo);
+    if (resposta.status === 404 || resposta.status === 204) {
+      return { ok: true, encontrado: false, status: resposta.status };
+    }
+    if (resposta.status === 409) {
+      return { ok: true, encontrado: true, status: resposta.status };
+    }
+    if (!resposta.ok) {
+      if (MENSAGEM_JA_EXISTE.test(texto.toLowerCase())) {
+        return { ok: true, encontrado: true, status: resposta.status };
+      }
+      console.warn("[verificar] falha", resposta.status, caminho.split("?")[0], texto.slice(0, 80));
+      return { ok: false, encontrado: false, status: resposta.status };
+    }
+    const encontrado = corpoIndicaExistencia(corpo, consulta);
+    const chaves = corpo && typeof corpo === "object" && !Array.isArray(corpo)
+      ? Object.keys(corpo).slice(0, 12).join(",")
+      : (Array.isArray(corpo) ? `array:${corpo.length}` : "");
+    console.log("[verificar]", resposta.status, caminho.split("?")[0], encontrado ? "existe" : "livre", chaves, texto.slice(0, 80));
+    return { ok: true, encontrado, status: resposta.status };
+  } catch (erro) {
+    console.warn("[verificar] erro", caminho.split("?")[0], erro.message);
+    return { ok: false, encontrado: false, status: 0 };
   }
 };
 
 const consultarExistencia = async (token, { cpf, email }) => {
   const campos = [];
-  if (cpf && cpf.length === 11) {
-    for (const modelo of caminhosLookup("cpf")) {
-      const caminho = modelo.replace("{cpf}", encodeURIComponent(cpf)).replace("{email}", "");
-      if (await buscarRegistro(token, caminho)) {
-        campos.push("CPF");
+  let consultaOk = false;
+
+  const tentar = async (tipo, valor) => {
+    if (!valor) return;
+    let achou = false;
+    const consulta = tipo === "cpf" ? { cpf: valor } : { email: valor };
+    for (const modelo of caminhosLookup(tipo)) {
+      const caminho = modelo
+        .replace("{cpf}", encodeURIComponent(tipo === "cpf" ? valor : ""))
+        .replace("{email}", encodeURIComponent(tipo === "email" ? valor : ""));
+      const resultado = await buscarRegistro(token, caminho, consulta);
+      if (resultado.ok) consultaOk = true;
+      if (resultado.encontrado) {
+        achou = true;
         break;
       }
     }
-  }
-  if (email) {
-    for (const modelo of caminhosLookup("email")) {
-      const caminho = modelo.replace("{email}", encodeURIComponent(email)).replace("{cpf}", "");
-      if (await buscarRegistro(token, caminho)) {
-        campos.push("e-mail");
-        break;
-      }
-    }
+    if (achou) campos.push(tipo === "cpf" ? "CPF" : "e-mail");
+  };
+
+  if (cpf && cpf.length === 11) await tentar("cpf", cpf);
+  if (email) await tentar("email", email);
+  if (!consultaOk) {
+    const erro = new Error("Não foi possível consultar o CPF e o e-mail agora. Tente de novo em instantes.");
+    erro.status = 502;
+    throw erro;
   }
   if (!campos.length) return { existe: false, campos: [] };
   return { existe: true, campos, campo: campos.join(" e ") };
@@ -452,6 +552,7 @@ const montarLeadIndico = (dados, captchaToken, extras = {}) => {
     state: dados.uf,
     country: "BR",
     accept_terms: Boolean(dados.acceptTerms),
+    accept_privacy: Boolean(dados.acceptTerms),
     contact_authorization: Boolean(dados.acceptTerms)
   };
   const nascimento = dataNascimentoIndico(dados.birthday);
@@ -461,6 +562,10 @@ const montarLeadIndico = (dados, captchaToken, extras = {}) => {
   if (dados.referencia) lead.message = dados.referencia;
   if (extras.landing_page_url) lead.landing_page_url = extras.landing_page_url;
   if (extras.referrer) lead.referrer = extras.referrer;
+  ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].forEach((campo) => {
+    const valor = String(extras[campo] || "").trim();
+    if (valor) lead[campo] = valor;
+  });
   return lead;
 };
 
@@ -475,9 +580,15 @@ const enviarLeadIndico = async (req, dados, captchaToken, extras = {}) => {
     "/api/v1/leads",
     montarLeadIndico(dados, captchaToken, extras)
   );
-  if (!resposta.ok && resposta.status !== 202) {
-    const erro = new Error(mensagemOtp(corpo, resposta.status) || "Não foi possível gravar o lead.");
-    erro.status = resposta.status;
+  const falhou = String(corpo?.status || corpo?.reason || corpo?.error || "").toLowerCase();
+  console.log("[lead]", resposta.status, corpo?.id || "", falhou || "aceito");
+  if ((!resposta.ok && resposta.status !== 202) || /no column mapping|failed/.test(falhou)) {
+    const erro = new Error(
+      /no column mapping/.test(falhou)
+        ? "O destino Indico ainda não tem column_map. Sem isso o lead não entra no banco."
+        : (mensagemOtp(corpo, resposta.status) || "Não foi possível gravar o lead.")
+    );
+    erro.status = resposta.status || 502;
     throw erro;
   }
   return corpo;
@@ -574,6 +685,8 @@ app.post("/api/otp/gerar", async (req, res) => {
   if (!captchaToken) {
     return res.status(400).json({ ok: false, message: "Faltou o captcha. Recarregue a página e tente de novo." });
   }
+  const revelar = deveRevelarOtp();
+  const devCode = revelar ? gerarOtpLocal(email) : "";
   try {
     const { resposta, corpo } = await chamarIndico(req, "/api/v1/otp/generate", {
       email,
@@ -581,17 +694,36 @@ app.post("/api/otp/gerar", async (req, res) => {
       purpose: INDICO_OTP_PURPOSE
     });
     if (!resposta.ok) {
+      console.warn("[otp/gerar]", resposta.status, corpo?.error || mensagemOtp(corpo, resposta.status));
+      if (devCode) {
+        return res.status(201).json({
+          ok: true,
+          devCode,
+          message: "A Indico não enviou o e-mail. Use o código de teste na tela."
+        });
+      }
       return res.status(resposta.status).json({
         ok: false,
         message: mensagemOtp(corpo, resposta.status)
       });
     }
+    console.log("[otp/gerar]", resposta.status, "enviado", corpo?.expires_at || "");
     return res.status(201).json({
       ok: true,
       expiresAt: corpo.expires_at || null,
-      message: "Enviamos um código de 6 dígitos para o seu e-mail."
+      ...(devCode ? { devCode } : {}),
+      message: devCode
+        ? "Se o e-mail não chegou, use o código de teste na tela."
+        : "Enviamos um código de 6 dígitos para o seu e-mail. Confira também a caixa de spam."
     });
   } catch (erro) {
+    if (devCode) {
+      return res.status(201).json({
+        ok: true,
+        devCode,
+        message: "A Indico não enviou o e-mail. Use o código de teste na tela."
+      });
+    }
     return res.status(erro.status || 502).json({
       ok: false,
       message: erro.message || "Não foi possível enviar o código."
@@ -611,15 +743,23 @@ app.post("/api/otp/validar", async (req, res) => {
       code,
       purpose: INDICO_OTP_PURPOSE
     });
-    if (!resposta.ok) {
-      return res.status(resposta.status).json({
-        ok: false,
-        message: mensagemOtp(corpo, resposta.status)
-      });
+    if (resposta.ok) {
+      marcarEmailVerificado(email);
+      return res.json({ ok: true, message: "E-mail confirmado." });
     }
-    marcarEmailVerificado(email);
-    return res.json({ ok: true, message: "E-mail confirmado." });
+    if (validarOtpLocal(email, code)) {
+      marcarEmailVerificado(email);
+      return res.json({ ok: true, message: "E-mail confirmado." });
+    }
+    return res.status(resposta.status).json({
+      ok: false,
+      message: mensagemOtp(corpo, resposta.status)
+    });
   } catch (erro) {
+    if (validarOtpLocal(email, code)) {
+      marcarEmailVerificado(email);
+      return res.json({ ok: true, message: "E-mail confirmado." });
+    }
     return res.status(erro.status || 502).json({
       ok: false,
       message: erro.message || "Não foi possível validar o código."
@@ -645,7 +785,12 @@ app.post("/api/lead", async (req, res) => {
   try {
     await enviarLeadIndico(req, validacao.dados, captchaToken, {
       landing_page_url: String(req.body?.landing_page_url || "").trim(),
-      referrer: String(req.body?.referrer || "").trim()
+      referrer: String(req.body?.referrer || "").trim(),
+      utm_source: req.body?.utm_source,
+      utm_medium: req.body?.utm_medium,
+      utm_campaign: req.body?.utm_campaign,
+      utm_term: req.body?.utm_term,
+      utm_content: req.body?.utm_content
     });
     return res.status(202).json({ ok: true, message: "Lead gravado." });
   } catch (erro) {
