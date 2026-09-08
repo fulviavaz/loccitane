@@ -438,10 +438,7 @@
     }
     .lider__link {
       position: relative;
-      display: inline-flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.4rem;
+      display: inline-block;
       margin-top: 0.9rem;
       font-size: 0.9rem;
       font-weight: 700;
@@ -450,6 +447,14 @@
       text-underline-offset: 3px;
     }
     .lider__link:hover { color: var(--red-deep); }
+    .lider__link-end { white-space: nowrap; }
+    .lider__link svg {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-left: 0.2em;
+      vertical-align: -0.15em;
+    }
 
     .form {
       position: relative;
@@ -1517,8 +1522,7 @@
             </div>
             <p>Você tem o apoio de uma líder de referência que já percorreu esse caminho e conhece o programa. Ela acompanha você pelo WhatsApp desde o início da jornada, ajuda nas primeiras vendas, tira dúvidas e te orienta sobre como aumentar sua renda extra.</p>
             <a class="lider__link" href="https://wa.me/5511975743863" target="_blank" rel="noopener">
-              Fique tranquilo, você também poderá contar com o SAC, é só clicar.
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              Fique tranquilo, você também poderá contar com o SAC, é só <span class="lider__link-end">clicar. <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
             </a>
           </div>
         </div>
