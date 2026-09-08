@@ -11,8 +11,12 @@ const ZIPCODE_PATH = process.env.GERA_ZIPCODE_PATH || "/api/Public/GeographicalS
 const DOCUMENT_TYPE_CPF = process.env.GERA_DOCUMENT_TYPE_CPF || "2";
 const INDICATOR_CODE = process.env.GERA_INDICATOR_CODE || "2315";
 const REGISTRATION_ORIGIN = process.env.GERA_REGISTRATION_ORIGIN || "";
+const PASSWORD_PATH = process.env.GERA_PASSWORD_PATH || "/api/password";
+const APPLICATION_CODE = process.env.GERA_APPLICATION_CODE || "";
 const SENHA_PREFIXO = "Locci@";
-const SENHA_ALFABETO = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789#$@";
+const SENHA_LETRAS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
+const SENHA_NUMEROS = "23456789";
+const SENHA_EXTRA = `${SENHA_LETRAS}${SENHA_NUMEROS}`;
 
 const tokenCache = { token: "", expiresAt: 0 };
 
@@ -231,13 +235,22 @@ const resolverEstruturaGeografica = async (token, zipCode, logradouro) => {
   return escolherCodigoLogradouro(corpo, logradouro);
 };
 
+const escolherChar = (alfabeto) => alfabeto[crypto.randomBytes(1)[0] % alfabeto.length];
+
 const gerarSenhaAleatoria = () => {
-  const bytes = crypto.randomBytes(6);
-  let sufixo = "";
-  for (let i = 0; i < 6; i += 1) {
-    sufixo += SENHA_ALFABETO[bytes[i] % SENHA_ALFABETO.length];
+  const sufixo = [
+    escolherChar(SENHA_LETRAS),
+    escolherChar(SENHA_LETRAS),
+    escolherChar(SENHA_NUMEROS),
+    escolherChar(SENHA_EXTRA),
+    escolherChar(SENHA_EXTRA),
+    escolherChar(SENHA_EXTRA)
+  ];
+  for (let i = sufixo.length - 1; i > 0; i -= 1) {
+    const j = crypto.randomBytes(1)[0] % (i + 1);
+    [sufixo[i], sufixo[j]] = [sufixo[j], sufixo[i]];
   }
-  return `${SENHA_PREFIXO}${sufixo}`;
+  return `${SENHA_PREFIXO}${sufixo.join("")}`;
 };
 
 const cadastrarRevendedor = async (token, dados, geographicStructureCode, senha) => {
@@ -259,7 +272,9 @@ const cadastrarRevendedor = async (token, dados, geographicStructureCode, senha)
     allowsRegisterDivulgation: String(dados.allowsRegisterDivulgation),
     acceptsMessages: String(dados.acceptsMessages),
     indicatorCode: INDICATOR_CODE,
-    password: senha
+    password: senha,
+    newPassword: senha,
+    confirmPassword: senha
   };
 
   if (dados.complemento) campos.addressComplement = dados.complemento;
@@ -525,6 +540,58 @@ const obterRevendedor = async (token, codigo) => {
   });
   if (!resposta.ok) return {};
   return lerJsonSeguro(resposta);
+};
+
+const obterRevendedorPorDocumento = async (token, { cpf, email }) => {
+  const caminhos = [];
+  if (cpf) {
+    caminhos.push(`/api/sellers?functionCode=1&document=${encodeURIComponent(cpf)}&includeOptions=documents&includeOptions=emails`);
+    caminhos.push(`/api/Public/Sellers?mainDocument=${encodeURIComponent(cpf)}`);
+  }
+  if (email) {
+    caminhos.push(`/api/sellers?functionCode=1&email=${encodeURIComponent(email)}&includeOptions=emails`);
+  }
+  for (const caminho of caminhos) {
+    const resposta = await fetch(joinUrl(BASE_URL, caminho), {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!resposta.ok) continue;
+    const corpo = await lerJsonSeguro(resposta);
+    const registros = listarRegistros(corpo);
+    const bate = registros.find((item) => registroBateConsulta(item, { cpf, email }));
+    if (bate) return bate;
+    if (registros[0]) return registros[0];
+  }
+  return {};
+};
+
+const definirSenha = async (token, { senha, codigo, email }) => {
+  const personCode = String(codigo || "").trim();
+  if (!PASSWORD_PATH || !senha || !personCode) return { ok: false, status: 0 };
+  if (!/^\d+$/.test(personCode) || Number(personCode) <= 0) return { ok: false, status: 0 };
+
+  const campos = {
+    newPassword: senha,
+    personCode,
+    code: personCode
+  };
+  if (email) campos.email = email;
+  if (APPLICATION_CODE) campos.applicationCode = APPLICATION_CODE;
+
+  const resposta = await fetch(joinUrl(BASE_URL, PASSWORD_PATH), {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(campos)
+  });
+  const corpo = await lerJsonSeguro(resposta);
+  if (!resposta.ok) {
+    console.warn("[senha] PATCH", resposta.status, extrairMensagem(corpo).slice(0, 120));
+  }
+  return { ok: resposta.ok, status: resposta.status };
 };
 
 const origemIndico = (req) => req.get("origin") || INDICO_ORIGIN;
@@ -902,15 +969,37 @@ app.post("/api/cadastro", async (req, res) => {
     } catch {
       detalhe = {};
     }
-    const codigoFinal = extrairCodigoRevendedora(detalhe) || codigo;
+    let codigoFinal = extrairCodigoRevendedora(detalhe) || codigo;
+    if (!codigoFinal) {
+      try {
+        detalhe = await obterRevendedorPorDocumento(token, validacao.dados);
+        codigoFinal = extrairCodigoRevendedora(detalhe) || codigoFinal;
+      } catch {
+        codigoFinal = codigoFinal || "";
+      }
+    }
+
+    let senhaGravada = false;
+    try {
+      const patch = await definirSenha(token, {
+        senha,
+        codigo: codigoFinal,
+        email: validacao.dados.email
+      });
+      senhaGravada = Boolean(patch.ok);
+    } catch (erroSenha) {
+      console.warn("[senha] PATCH erro", erroSenha.message);
+    }
     emailsVerificados.delete(validacao.dados.email);
 
     return res.json({
       ok: true,
       login: validacao.dados.email,
-      senha,
+      senha: senhaGravada ? senha : "",
       codigo: codigoFinal,
-      message: "Cadastro criado. Guarde seu usuário e senha agora."
+      message: senhaGravada
+        ? "Cadastro criado. Guarde seu usuário e senha agora."
+        : "Cadastro criado. A senha de acesso foi enviada para o seu e-mail."
     });
   } catch (erro) {
     return res.status(502).json({
