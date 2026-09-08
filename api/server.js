@@ -11,8 +11,14 @@ const ZIPCODE_PATH = process.env.GERA_ZIPCODE_PATH || "/api/Public/GeographicalS
 const DOCUMENT_TYPE_CPF = process.env.GERA_DOCUMENT_TYPE_CPF || "2";
 const INDICATOR_CODE = process.env.GERA_INDICATOR_CODE || "2315";
 const REGISTRATION_ORIGIN = process.env.GERA_REGISTRATION_ORIGIN || "";
-const PASSWORD_PATH = process.env.GERA_PASSWORD_PATH || "/api/password";
-const APPLICATION_CODE = process.env.GERA_APPLICATION_CODE || "";
+const passwordPathEnv = String(process.env.GERA_PASSWORD_PATH || "").trim();
+const PASSWORD_PATH = !passwordPathEnv || /\/api\/password\/?$/i.test(passwordPathEnv)
+  ? "/api/people/{id}"
+  : passwordPathEnv;
+const ESCRITORIO_URL = process.env.GERA_ESCRITORIO_URL
+  || (BASE_URL.includes("hml")
+    ? "https://hmlgeraad.revendedorloccitaneaubresil.com/"
+    : "https://revendedor.loccitaneaubresil.com/");
 const SENHA_PREFIXO = "Locci@";
 const SENHA_LETRAS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
 const SENHA_NUMEROS = "23456789";
@@ -510,7 +516,8 @@ const extrairCodigoRevendedora = (corpo) => {
   const fonte = Array.isArray(primeiro) ? primeiro[0] : primeiro;
   if (!fonte || typeof fonte !== "object") return "";
   return String(
-    fonte.code
+    fonte.userCode
+    || fonte.code
     || fonte.sellerCode
     || fonte.personCode
     || fonte.personId
@@ -565,31 +572,26 @@ const obterRevendedorPorDocumento = async (token, { cpf, email }) => {
   return {};
 };
 
-const definirSenha = async (token, { senha, codigo, email }) => {
+const definirSenha = async (token, { senha, codigo }) => {
   const personCode = String(codigo || "").trim();
   if (!PASSWORD_PATH || !senha || !personCode) return { ok: false, status: 0 };
   if (!/^\d+$/.test(personCode) || Number(personCode) <= 0) return { ok: false, status: 0 };
 
-  const campos = {
-    newPassword: senha,
-    personCode,
-    code: personCode
-  };
-  if (email) campos.email = email;
-  if (APPLICATION_CODE) campos.applicationCode = APPLICATION_CODE;
-
-  const resposta = await fetch(joinUrl(BASE_URL, PASSWORD_PATH), {
-    method: "PATCH",
+  const caminho = PASSWORD_PATH.includes("{id}")
+    ? PASSWORD_PATH.replace("{id}", encodeURIComponent(personCode))
+    : `${PASSWORD_PATH.replace(/\/$/, "")}/${encodeURIComponent(personCode)}`;
+  const resposta = await fetch(joinUrl(BASE_URL, caminho), {
+    method: "PUT",
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(campos)
+    body: JSON.stringify([{ password: senha }])
   });
   const corpo = await lerJsonSeguro(resposta);
   if (!resposta.ok) {
-    console.warn("[senha] PATCH", resposta.status, extrairMensagem(corpo).slice(0, 120));
+    console.warn("[senha] PUT people", resposta.status, extrairMensagem(corpo).slice(0, 120));
   }
   return { ok: resposta.ok, status: resposta.status };
 };
@@ -731,7 +733,7 @@ app.get("/api/health", (_req, res) => {
 app.get("/api/config", (_req, res) => {
   res.json({
     recaptchaSiteKey: RECAPTCHA_SITE_KEY,
-    escritorioUrl: "https://revendedor.loccitaneaubresil.com/"
+    escritorioUrl: ESCRITORIO_URL
   });
 });
 
@@ -981,14 +983,13 @@ app.post("/api/cadastro", async (req, res) => {
 
     let senhaGravada = false;
     try {
-      const patch = await definirSenha(token, {
+      const gravacao = await definirSenha(token, {
         senha,
-        codigo: codigoFinal,
-        email: validacao.dados.email
+        codigo: codigoFinal
       });
-      senhaGravada = Boolean(patch.ok);
+      senhaGravada = Boolean(gravacao.ok);
     } catch (erroSenha) {
-      console.warn("[senha] PATCH erro", erroSenha.message);
+      console.warn("[senha] PUT people erro", erroSenha.message);
     }
     emailsVerificados.delete(validacao.dados.email);
 
