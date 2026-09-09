@@ -87,7 +87,13 @@ const mensagemAmigavel = (bruta, status) => {
   if (/pend[eê]ncia|pending|document/.test(texto) && /rg|comprovante|resid/.test(texto)) {
     return "O cadastro foi criado, mas ainda há pendências. Complete os dados no Escritório Virtual.";
   }
-  if (/token|unauthor|authent|credential|invalid_client|invalid_grant|usu[aá]rio ou senha|password/.test(texto) || status === 401) {
+  if (/invalid_grant|usu[aá]rio ou senha/.test(texto)) {
+    return "As credenciais da API Gera foram recusadas. Peça o reset da senha do integrador HML.";
+  }
+  if (/invalid_client/.test(texto)) {
+    return "O client da API Gera foi recusado. Confira o clientId e o clientSecret.";
+  }
+  if (/unauthor|authent|credential|access.?token|bearer/.test(texto) || status === 401) {
     return "Não foi possível conectar à API agora. Tente de novo em instantes.";
   }
   if (status >= 500) {
@@ -277,10 +283,7 @@ const cadastrarRevendedor = async (token, dados, geographicStructureCode, senha)
     acceptTerms: String(dados.acceptTerms),
     allowsRegisterDivulgation: String(dados.allowsRegisterDivulgation),
     acceptsMessages: String(dados.acceptsMessages),
-    indicatorCode: INDICATOR_CODE,
-    password: senha,
-    newPassword: senha,
-    confirmPassword: senha
+    indicatorCode: INDICATOR_CODE
   };
 
   if (dados.complemento) campos.addressComplement = dados.complemento;
