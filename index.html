@@ -1672,19 +1672,20 @@
               </div>
               <div class="form__cred">
                 <div>
+                  <span>E-mail</span>
+                  <strong id="lead-email-acesso">—</strong>
+                </div>
+                <button class="btn btn--ghost form__copy" type="button" data-copy="lead-email-acesso">Copiar</button>
+              </div>
+              <div class="form__cred">
+                <div>
                   <span>Senha</span>
                   <strong id="lead-senha">—</strong>
                 </div>
                 <button class="btn btn--ghost form__copy" type="button" data-copy="lead-senha">Copiar</button>
               </div>
-              <div class="form__cred" id="lead-codigo-box">
-                <div>
-                  <span>Código de revendedora</span>
-                  <strong id="lead-codigo">—</strong>
-                </div>
-              </div>
             </div>
-            <p class="form__note">Entre no Escritório Virtual com este e-mail e esta senha. Se o login pedir o código, use o código de revendedora. A senha vale por 5 dias.</p>
+            <p class="form__note">No Escritório Virtual o usuário é o código de revendedora, não o e-mail. A senha vale por 5 dias.</p>
             <a class="btn" href="https://revendedor.loccitaneaubresil.com/" target="_blank" rel="noopener">Abrir Escritório Virtual</a>
           </div>
         </form>
@@ -2452,8 +2453,10 @@
       if (!resposta.ok || !data.ok) {
         throw new Error(data.message || "Não foi possível concluir o cadastro.");
       }
-      const login = data.login || payloadAtual.email;
+      const login = data.codigo || data.login || payloadAtual.email;
       document.getElementById("lead-login").textContent = login;
+      const emailAcesso = document.getElementById("lead-email-acesso");
+      if (emailAcesso) emailAcesso.textContent = data.email || payloadAtual.email || "—";
       const senhaEl = document.getElementById("lead-senha");
       const senhaCopy = document.querySelector('[data-copy="lead-senha"]');
       if (data.senha) {
@@ -2462,14 +2465,6 @@
       } else {
         senhaEl.textContent = "Enviada para o seu e-mail";
         if (senhaCopy) senhaCopy.style.display = "none";
-      }
-      const codigoEl = document.getElementById("lead-codigo");
-      const codigoBox = document.getElementById("lead-codigo-box");
-      if (data.codigo && String(data.codigo) !== String(login)) {
-        codigoEl.textContent = data.codigo;
-        codigoBox.style.display = "";
-      } else {
-        codigoBox.style.display = "none";
       }
       irParaPasso("sucesso", {
         titulo: "Cadastro concluído",
@@ -2647,9 +2642,9 @@
       mostrarCodigo("Se o e-mail não chegou, use o código de teste na tela.", "482193");
     }
     if (preview === "sucesso") {
-      document.getElementById("lead-login").textContent = "maria.silva@gmail.com";
+      document.getElementById("lead-login").textContent = "691600";
+      document.getElementById("lead-email-acesso").textContent = "maria.silva@gmail.com";
       document.getElementById("lead-senha").textContent = "Locci@Ab3$xY";
-      document.getElementById("lead-codigo-box").style.display = "none";
       irParaPasso("sucesso", {
         titulo: "Cadastro concluído",
         intro: "Guarde seu acesso e entre no Escritório Virtual."

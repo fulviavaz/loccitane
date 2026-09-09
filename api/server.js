@@ -580,9 +580,10 @@ const definirSenha = async (token, { senha, codigo }) => {
   if (!PASSWORD_PATH || !senha || !personCode) return { ok: false, status: 0 };
   if (!/^\d+$/.test(personCode) || Number(personCode) <= 0) return { ok: false, status: 0 };
 
-  const caminho = PASSWORD_PATH.includes("{id}")
+  const caminhoBase = PASSWORD_PATH.includes("{id}")
     ? PASSWORD_PATH.replace("{id}", encodeURIComponent(personCode))
     : `${PASSWORD_PATH.replace(/\/$/, "")}/${encodeURIComponent(personCode)}`;
+  const caminho = `${caminhoBase}${caminhoBase.includes("?") ? "&" : "?"}personFunction=1`;
   const resposta = await fetch(joinUrl(BASE_URL, caminho), {
     method: "PUT",
     headers: {
@@ -590,7 +591,10 @@ const definirSenha = async (token, { senha, codigo }) => {
       Accept: "application/json",
       "Content-Type": "application/json"
     },
-    body: JSON.stringify([{ password: senha }])
+    body: JSON.stringify([{
+      password: senha,
+      code: Number(personCode)
+    }])
   });
   const corpo = await lerJsonSeguro(resposta);
   if (!resposta.ok) {
@@ -998,7 +1002,8 @@ app.post("/api/cadastro", async (req, res) => {
 
     return res.json({
       ok: true,
-      login: validacao.dados.email,
+      login: codigoFinal || validacao.dados.email,
+      email: validacao.dados.email,
       senha: senhaGravada ? senha : "",
       codigo: codigoFinal,
       message: senhaGravada
