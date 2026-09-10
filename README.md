@@ -81,7 +81,7 @@ Copie `api/.env.example` para `api/.env` **no servidor**. Esse arquivo **não va
 | `GERA_PASSWORD` | senha do integrador |
 | `GERA_INDICATOR_CODE` | `2315` |
 | `GERA_ZIPCODE_PATH` | `/api/Public/GeographicalStructures?postalCode={cep}` |
-| `GERA_PASSWORD_PATH` | não usar — a senha da tela/e-mail é gerada na LP (`Locci@`) e enviada pela Dinamize |
+| `GERA_PASSWORD_PATH` | `PATCH /api/password` com o token da revendedora (nunca o do integrador) |
 | `GERA_ESCRITORIO_URL` | HML: `https://hmlgeraad.revendedorloccitaneaubresil.com/` — produção: `https://revendedor.loccitaneaubresil.com/` |
 | `INDICO_API_BASE` | API do OTP Indico (staging: `https://lp-collector-api-670020683031.us-east1.run.app`) |
 | `INDICO_DB_ID` | UUID do destino (`X-Db-ID`) |
@@ -110,7 +110,7 @@ Em produção: `https://querorevender.loccitaneaubresil.com` (ou o domínio fina
 3. `POST /api/otp/gerar` envia o código de 6 dígitos (Indico).
 4. `POST /api/otp/validar` confere o PIN.
 5. `POST /api/lead` grava o lead no destino Indico (`POST /api/v1/leads`).
-6. `POST /api/cadastro` cria o revendedor na Gera, gera a senha `Locci@`, mostra na tela e envia o mesmo acesso pela Dinamize.
+6. `POST /api/cadastro` cria o revendedor na Gera (`POST /api/Public/Sellers`), lê o `accessKey` do retorno, troca por um token da revendedora (`grant_type=access_key`) e define a senha `Locci@` com `PATCH /api/password`. Depois mostra o acesso na tela e envia o mesmo pela Dinamize.
 
 ## Dinamize
 

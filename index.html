@@ -1686,7 +1686,7 @@
                 <button class="btn btn--ghost form__copy" type="button" data-copy="lead-senha">Copiar</button>
               </div>
             </div>
-            <p class="form__note">O usuário é o e-mail. Enviamos a senha para esta caixa de entrada. Se o login recusar, use Esqueci senha no Escritório Virtual.</p>
+            <p class="form__note" id="lead-senha-nota">O usuário é o e-mail. Enviamos a senha para esta caixa de entrada.</p>
             <a class="btn" href="https://revendedor.loccitaneaubresil.com/" target="_blank" rel="noopener">Abrir Escritório Virtual</a>
           </div>
         </form>
@@ -2473,6 +2473,12 @@
         senhaEl.textContent = "Enviada para o seu e-mail";
         if (senhaCopy) senhaCopy.style.display = "none";
       }
+      const senhaNota = document.getElementById("lead-senha-nota");
+      if (senhaNota) {
+        senhaNota.textContent = data.senhaDefinida === false
+          ? "O cadastro foi criado, mas a senha ainda não entrou no Escritório Virtual. Use Esqueci senha com este e-mail."
+          : "O usuário é o e-mail. Enviamos a mesma senha para esta caixa de entrada.";
+      }
       irParaPasso("sucesso", {
         titulo: "Cadastro concluído",
         intro: data.message || "Guarde seu acesso e entre no Escritório Virtual."
@@ -2653,6 +2659,8 @@
       document.getElementById("lead-codigo").textContent = "691601";
       document.getElementById("lead-codigo-box").hidden = false;
       document.getElementById("lead-senha").textContent = "Locci@Ab3xY7";
+      const senhaNota = document.getElementById("lead-senha-nota");
+      if (senhaNota) senhaNota.textContent = "O usuário é o e-mail. Enviamos a mesma senha para esta caixa de entrada.";
       irParaPasso("sucesso", {
         titulo: "Cadastro concluído",
         intro: "Cadastro criado. Enviamos a senha para este e-mail. O usuário é o e-mail."

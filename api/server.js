@@ -12,9 +12,10 @@ const DOCUMENT_TYPE_CPF = process.env.GERA_DOCUMENT_TYPE_CPF || "2";
 const INDICATOR_CODE = process.env.GERA_INDICATOR_CODE || "2315";
 const REGISTRATION_ORIGIN = process.env.GERA_REGISTRATION_ORIGIN || "";
 const passwordPathEnv = String(process.env.GERA_PASSWORD_PATH || "").trim();
-const PASSWORD_PATH = !passwordPathEnv || /\/api\/password\/?$/i.test(passwordPathEnv)
-  ? "/api/people/{id}"
+const PASSWORD_PATH = !passwordPathEnv || /\/api\/people\//i.test(passwordPathEnv)
+  ? "/api/password"
   : passwordPathEnv;
+const APPLICATION_CODE = String(process.env.GERA_APPLICATION_CODE || "").trim();
 const ESCRITORIO_URL = process.env.GERA_ESCRITORIO_URL
   || (BASE_URL.includes("hml")
     ? "https://hmlgeraad.revendedorloccitaneaubresil.com/"
@@ -528,6 +529,74 @@ const consultarExistencia = async (token, { cpf, email }) => {
   }
   if (!campos.length) return { existe: false, campos: [] };
   return { existe: true, campos, campo: campos.join(" e ") };
+};
+
+const extrairAccessKey = (corpo) => {
+  const visitados = new Set();
+  const fila = [corpo];
+  while (fila.length) {
+    const atual = fila.shift();
+    if (!atual || typeof atual !== "object" || visitados.has(atual)) continue;
+    visitados.add(atual);
+    const chave = atual.accessKey || atual.acessKey || atual.access_key || atual.AccessKey;
+    if (chave) return String(chave);
+    Object.values(atual).forEach((valor) => {
+      if (valor && typeof valor === "object") fila.push(valor);
+    });
+  }
+  return "";
+};
+
+const obterTokenPorAccessKey = async (accessKey) => {
+  const resposta = await fetch(joinUrl(BASE_URL, TOKEN_PATH), {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "access_key",
+      client_id: process.env.GERA_CLIENT_ID || "",
+      client_secret: process.env.GERA_CLIENT_SECRET || "",
+      access_key: accessKey
+    })
+  });
+  const corpo = await lerJsonSeguro(resposta);
+  const token = corpo.access_token || corpo.accessToken || corpo.token;
+  if (!resposta.ok || !token) {
+    const erro = new Error(extrairMensagem(corpo) || "Falha ao autenticar a revendedora recém-cadastrada.");
+    erro.status = resposta.status || 502;
+    throw erro;
+  }
+  return token;
+};
+
+const alterarSenhaRevendedora = async (tokenRevendedora, senha) => {
+  const payload = { newPassword: senha };
+  if (APPLICATION_CODE) payload.applicationCode = APPLICATION_CODE;
+  const resposta = await fetch(joinUrl(BASE_URL, PASSWORD_PATH), {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${tokenRevendedora}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+  const corpo = await lerJsonSeguro(resposta);
+  if (!resposta.ok) {
+    const erro = new Error(extrairMensagem(corpo) || "Falha ao definir a senha da revendedora.");
+    erro.status = resposta.status || 502;
+    throw erro;
+  }
+  return true;
+};
+
+const definirSenhaInicial = async (corpoCadastro, senha) => {
+  const accessKey = extrairAccessKey(corpoCadastro);
+  if (!accessKey) {
+    console.warn("[senha] cadastro sem accessKey");
+    return false;
+  }
+  const tokenRevendedora = await obterTokenPorAccessKey(accessKey);
+  await alterarSenhaRevendedora(tokenRevendedora, senha);
+  return true;
 };
 
 const extrairCodigoRevendedora = (corpo) => {
@@ -1149,6 +1218,14 @@ app.post("/api/cadastro", async (req, res) => {
     }
 
     const senha = gerarSenhaAleatoria();
+    let senhaDefinida = false;
+    try {
+      senhaDefinida = await definirSenhaInicial(corpo, senha);
+      if (senhaDefinida) console.log("[senha] PATCH ok para a revendedora recém-cadastrada");
+    } catch (erroSenha) {
+      console.warn("[senha] PATCH falhou", erroSenha.status || "", String(erroSenha.message || "").slice(0, 160));
+    }
+
     let emailEnviado = false;
     try {
       const dinamize = await enviarAcessoDinamize({
@@ -1166,16 +1243,21 @@ app.post("/api/cadastro", async (req, res) => {
     }
     emailsVerificados.delete(validacao.dados.email);
 
+    const message = !senhaDefinida
+      ? "Cadastro criado, mas a senha ainda não entrou no Escritório Virtual. Use Esqueci senha com este e-mail."
+      : emailEnviado
+        ? "Cadastro criado. Enviamos a senha para este e-mail. O usuário é o e-mail."
+        : "Cadastro criado. Guarde usuário e senha. O e-mail da Dinamize ainda não confirmou o envio.";
+
     return res.json({
       ok: true,
       login: validacao.dados.email,
       email: validacao.dados.email,
       senha,
       codigo: codigoFinal,
+      senhaDefinida,
       emailEnviado,
-      message: emailEnviado
-        ? "Cadastro criado. Enviamos a senha para este e-mail. O usuário é o e-mail."
-        : "Cadastro criado. Guarde usuário e senha. O e-mail da Dinamize ainda não confirmou o envio."
+      message
     });
   } catch (erro) {
     return res.status(502).json({
