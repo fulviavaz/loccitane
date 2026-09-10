@@ -81,13 +81,16 @@ Copie `api/.env.example` para `api/.env` **no servidor**. Esse arquivo **não va
 | `GERA_PASSWORD` | senha do integrador |
 | `GERA_INDICATOR_CODE` | `2315` |
 | `GERA_ZIPCODE_PATH` | `/api/Public/GeographicalStructures?postalCode={cep}` |
-| `GERA_PASSWORD_PATH` | `/api/people/{id}` (grava a senha da revendedora após o cadastro) |
+| `GERA_PASSWORD_PATH` | não usar — a senha da tela/e-mail é gerada na LP (`Locci@`) e enviada pela Dinamize |
 | `GERA_ESCRITORIO_URL` | HML: `https://hmlgeraad.revendedorloccitaneaubresil.com/` — produção: `https://revendedor.loccitaneaubresil.com/` |
 | `INDICO_API_BASE` | API do OTP Indico (staging: `https://lp-collector-api-670020683031.us-east1.run.app`) |
 | `INDICO_DB_ID` | UUID do destino (`X-Db-ID`) |
 | `INDICO_OTP_PURPOSE` | `registration` |
 | `INDICO_ORIGIN` | origem enviada à Indico — use a URL pública, ex. `https://querorevender.loccitaneaubresil.com` |
 | `RECAPTCHA_SITE_KEY` | chave de site do reCAPTCHA v3 |
+| `DINAMIZE_WEBHOOK_URL` | webhook de entrada da automação que envia o e-mail de acesso |
+| `DINAMIZE_USER` / `DINAMIZE_PASSWORD` / `DINAMIZE_CLIENT_CODE` | autenticação da API (`POST /auth`) |
+| `DINAMIZE_LIST_CODE` | lista de contatos com os campos `usuario`, `senha`, `codigo`, `escritorio_url` |
 
 Não use `https://api.gera.com.br` como `GERA_BASE_URL`. Isso é só o catálogo da documentação.
 
@@ -107,7 +110,18 @@ Em produção: `https://querorevender.loccitaneaubresil.com` (ou o domínio fina
 3. `POST /api/otp/gerar` envia o código de 6 dígitos (Indico).
 4. `POST /api/otp/validar` confere o PIN.
 5. `POST /api/lead` grava o lead no destino Indico (`POST /api/v1/leads`).
-6. `POST /api/cadastro` cria o revendedor na Gera, gera uma senha `Locci@` e mostra usuário/senha na tela de confirmação.
+6. `POST /api/cadastro` cria o revendedor na Gera, gera a senha `Locci@`, mostra na tela e envia o mesmo acesso pela Dinamize.
+
+## Dinamize
+
+No painel da Dinamize:
+
+1. Crie uma lista com os campos `usuario`, `senha`, `codigo` e `escritorio_url` (ou informe os códigos `cmp*` no `.env`).
+2. Crie a peça de e-mail usando esses campos.
+3. Crie uma automação disparada por **webhook de entrada** ou por **contato adicionado/atualizado**.
+4. Coloque `DINAMIZE_WEBHOOK_URL` e/ou usuário + senha + `client_code` + `list_code` no `.env` do servidor.
+
+O proxy autentica em `POST https://api.dinamize.com/auth`, grava o contato em `/emkt/contact/add` e, se houver webhook, dispara a automação com `{ email, nome, usuario, senha, codigo, escritorio_url }`.
 
 ## Local
 

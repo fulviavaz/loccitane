@@ -23,8 +23,25 @@ const SENHA_PREFIXO = "Locci@";
 const SENHA_LETRAS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
 const SENHA_NUMEROS = "23456789";
 const SENHA_EXTRA = `${SENHA_LETRAS}${SENHA_NUMEROS}`;
+const DINAMIZE_API_BASE = String(process.env.DINAMIZE_API_BASE || "https://api.dinamize.com").replace(/\/$/, "");
+const DINAMIZE_USER = String(process.env.DINAMIZE_USER || "").trim();
+const DINAMIZE_PASSWORD = String(process.env.DINAMIZE_PASSWORD || "");
+const DINAMIZE_CLIENT_CODE = String(process.env.DINAMIZE_CLIENT_CODE || "").trim();
+const DINAMIZE_LIST_CODE = String(process.env.DINAMIZE_LIST_CODE || "").trim();
+const DINAMIZE_WEBHOOK_URL = String(process.env.DINAMIZE_WEBHOOK_URL || "").trim();
+const DINAMIZE_SENDER_EMAIL = String(process.env.DINAMIZE_SENDER_EMAIL || "").trim();
+const DINAMIZE_SENDER_NAME = String(process.env.DINAMIZE_SENDER_NAME || "L'Occitane au Brésil").trim();
+const DINAMIZE_SUBJECT = String(process.env.DINAMIZE_SUBJECT || "Seu acesso ao Escritório Virtual").trim();
+const DINAMIZE_MESSAGE_CODE = String(process.env.DINAMIZE_MESSAGE_CODE || "").trim();
+const DINAMIZE_CAMPAIGN_CODE = String(process.env.DINAMIZE_CAMPAIGN_CODE || "").trim();
+const DINAMIZE_FILTER_CODE = String(process.env.DINAMIZE_FILTER_CODE || "").trim();
+const DINAMIZE_FIELD_USUARIO = String(process.env.DINAMIZE_FIELD_USUARIO || "usuario").trim();
+const DINAMIZE_FIELD_SENHA = String(process.env.DINAMIZE_FIELD_SENHA || "senha").trim();
+const DINAMIZE_FIELD_CODIGO = String(process.env.DINAMIZE_FIELD_CODIGO || "codigo").trim();
+const DINAMIZE_FIELD_ESCRITORIO = String(process.env.DINAMIZE_FIELD_ESCRITORIO || "escritorio_url").trim();
 
 const tokenCache = { token: "", expiresAt: 0 };
+const dinamizeTokenCache = { token: "", expiresAt: 0 };
 
 const soDigitos = (valor) => String(valor || "").replace(/\D/g, "");
 
@@ -265,7 +282,7 @@ const gerarSenhaAleatoria = () => {
   return `${SENHA_PREFIXO}${sufixo.join("")}`;
 };
 
-const cadastrarRevendedor = async (token, dados, geographicStructureCode, senha) => {
+const cadastrarRevendedor = async (token, dados, geographicStructureCode) => {
   const campos = {
     name: dados.nome,
     mainDocument: dados.cpf,
@@ -575,32 +592,177 @@ const obterRevendedorPorDocumento = async (token, { cpf, email }) => {
   return {};
 };
 
-const definirSenha = async (token, { senha, codigo }) => {
-  const personCode = String(codigo || "").trim();
-  if (!PASSWORD_PATH || !senha || !personCode) return { ok: false, status: 0 };
-  if (!/^\d+$/.test(personCode) || Number(personCode) <= 0) return { ok: false, status: 0 };
+const dinamizePronta = () => Boolean(
+  DINAMIZE_WEBHOOK_URL
+  || (DINAMIZE_USER && DINAMIZE_PASSWORD && DINAMIZE_CLIENT_CODE && DINAMIZE_LIST_CODE)
+);
 
-  const caminhoBase = PASSWORD_PATH.includes("{id}")
-    ? PASSWORD_PATH.replace("{id}", encodeURIComponent(personCode))
-    : `${PASSWORD_PATH.replace(/\/$/, "")}/${encodeURIComponent(personCode)}`;
-  const caminho = `${caminhoBase}${caminhoBase.includes("?") ? "&" : "?"}personFunction=1`;
-  const resposta = await fetch(joinUrl(BASE_URL, caminho), {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify([{
-      password: senha,
-      code: Number(personCode)
-    }])
+const montarAcessoEmail = ({ nome, email, senha, codigo }) => ({
+  event: "cadastro_revendedora",
+  email,
+  nome,
+  first_name: nome,
+  usuario: email,
+  senha,
+  codigo: codigo || "",
+  escritorio_url: ESCRITORIO_URL
+});
+
+const htmlAcessoDinamize = (acesso) => `<!DOCTYPE html>
+<html lang="pt-BR">
+<body style="margin:0;padding:24px;background:#f7f2ec;font-family:Arial,sans-serif;color:#3a2418;">
+  <div style="max-width:560px;margin:0 auto;background:#fff;padding:28px;border-radius:16px;">
+    <p style="margin:0 0 8px;letter-spacing:.08em;text-transform:uppercase;font-size:12px;">L'Occitane au Brésil</p>
+    <h1 style="margin:0 0 16px;font-size:22px;">Seu cadastro de revendedora</h1>
+    <p style="margin:0 0 16px;">Guarde estes dados para entrar no Escritório Virtual:</p>
+    <p style="margin:0 0 8px;"><strong>Usuário:</strong> ${acesso.usuario}</p>
+    <p style="margin:0 0 8px;"><strong>Senha:</strong> ${acesso.senha}</p>
+    ${acesso.codigo ? `<p style="margin:0 0 8px;"><strong>Código de revendedora:</strong> ${acesso.codigo}</p>` : ""}
+    <p style="margin:16px 0;"><a href="${acesso.escritorio_url}" style="color:#b42318;">Abrir Escritório Virtual</a></p>
+    <p style="margin:0;font-size:13px;">Se o login recusar a senha, use Esqueci senha na tela de login.</p>
+  </div>
+</body>
+</html>`;
+
+const extrairTokenDinamize = (corpo) => {
+  if (!corpo || typeof corpo !== "object") return "";
+  return String(
+    corpo["auth-token"]
+    || corpo.auth_token
+    || corpo.token
+    || corpo.data?.["auth-token"]
+    || corpo.data?.token
+    || ""
+  );
+};
+
+const obterTokenDinamize = async () => {
+  if (dinamizeTokenCache.token && Date.now() < dinamizeTokenCache.expiresAt) {
+    return dinamizeTokenCache.token;
+  }
+  const resposta = await fetch(`${DINAMIZE_API_BASE}/auth`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+    body: JSON.stringify({
+      user: DINAMIZE_USER,
+      password: DINAMIZE_PASSWORD,
+      client_code: DINAMIZE_CLIENT_CODE
+    })
   });
   const corpo = await lerJsonSeguro(resposta);
-  if (!resposta.ok) {
-    console.warn("[senha] PUT people", resposta.status, extrairMensagem(corpo).slice(0, 120));
+  const token = extrairTokenDinamize(corpo);
+  if (!resposta.ok || !token) {
+    throw new Error(extrairMensagem(corpo) || "A Dinamize recusou a autenticação.");
   }
-  return { ok: resposta.ok, status: resposta.status };
+  dinamizeTokenCache.token = token;
+  dinamizeTokenCache.expiresAt = Date.now() + 50 * 60 * 1000;
+  return token;
+};
+
+const chamarDinamize = async (token, pathname, payload) => {
+  const resposta = await fetch(`${DINAMIZE_API_BASE}${pathname}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      Accept: "application/json",
+      "auth-token": token
+    },
+    body: JSON.stringify(payload)
+  });
+  const corpo = await lerJsonSeguro(resposta);
+  return { resposta, corpo };
+};
+
+const gravarContatoDinamize = async (token, acesso) => {
+  const contato = {
+    "contact-list_code": DINAMIZE_LIST_CODE,
+    email: acesso.email,
+    first_name: acesso.nome
+  };
+  contato[DINAMIZE_FIELD_USUARIO] = acesso.usuario;
+  contato[DINAMIZE_FIELD_SENHA] = acesso.senha;
+  contato[DINAMIZE_FIELD_CODIGO] = acesso.codigo;
+  contato[DINAMIZE_FIELD_ESCRITORIO] = acesso.escritorio_url;
+
+  let { resposta, corpo } = await chamarDinamize(token, "/emkt/contact/add", contato);
+  if (!resposta.ok && /exist|already|duplic|cadastr/i.test(extrairMensagem(corpo))) {
+    ({ resposta, corpo } = await chamarDinamize(token, "/emkt/contact/update", contato));
+  }
+  if (!resposta.ok) {
+    console.warn("[dinamize] contato", resposta.status, extrairMensagem(corpo).slice(0, 160));
+    return false;
+  }
+  return true;
+};
+
+const dispararEmailDinamize = async (token, acesso) => {
+  let messageCode = DINAMIZE_MESSAGE_CODE;
+  if (!messageCode && DINAMIZE_SENDER_EMAIL) {
+    const { resposta, corpo } = await chamarDinamize(token, "/emkt/message/add", {
+      title: `Acesso ${acesso.email}`,
+      html: htmlAcessoDinamize(acesso)
+    });
+    messageCode = String(corpo?.code || corpo?.data?.code || corpo?.message_code || "");
+    if (!resposta.ok || !messageCode) {
+      console.warn("[dinamize] message", resposta.status, extrairMensagem(corpo).slice(0, 160));
+      return false;
+    }
+  }
+  if (!messageCode || !DINAMIZE_FILTER_CODE || !DINAMIZE_SENDER_EMAIL) return false;
+
+  const { resposta, corpo } = await chamarDinamize(token, "/emkt/action/add", {
+    title: `Acesso ${acesso.email}`,
+    "contact-list_code": DINAMIZE_LIST_CODE,
+    subject: DINAMIZE_SUBJECT,
+    sender_name: DINAMIZE_SENDER_NAME,
+    sender_email: DINAMIZE_SENDER_EMAIL,
+    reply_to: DINAMIZE_SENDER_EMAIL,
+    campaign_code: DINAMIZE_CAMPAIGN_CODE || undefined,
+    filter_code: DINAMIZE_FILTER_CODE,
+    message_code: messageCode,
+    message_type: "CAD",
+    send_speed: "2",
+    send_now: true,
+    optout_progressMode: "DI"
+  });
+  if (!resposta.ok) {
+    console.warn("[dinamize] action", resposta.status, extrairMensagem(corpo).slice(0, 160));
+    return false;
+  }
+  return true;
+};
+
+const enviarAcessoDinamize = async ({ nome, email, senha, codigo }) => {
+  if (!dinamizePronta()) return { ok: false, configurada: false };
+  const acesso = montarAcessoEmail({ nome, email, senha, codigo });
+  let ok = false;
+
+  if (DINAMIZE_WEBHOOK_URL) {
+    try {
+      const resposta = await fetch(DINAMIZE_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(acesso)
+      });
+      if (resposta.ok || resposta.status === 202 || resposta.status === 204) ok = true;
+      else console.warn("[dinamize] webhook", resposta.status);
+    } catch (erro) {
+      console.warn("[dinamize] webhook erro", erro.message);
+    }
+  }
+
+  if (DINAMIZE_USER && DINAMIZE_PASSWORD && DINAMIZE_CLIENT_CODE && DINAMIZE_LIST_CODE) {
+    try {
+      const token = await obterTokenDinamize();
+      const contatoOk = await gravarContatoDinamize(token, acesso);
+      const emailOk = await dispararEmailDinamize(token, acesso);
+      ok = ok || contatoOk || emailOk;
+    } catch (erro) {
+      console.warn("[dinamize] api erro", erro.message);
+    }
+  }
+
+  return { ok, configurada: true };
 };
 
 const origemIndico = (req) => req.get("origin") || INDICO_ORIGIN;
@@ -954,12 +1116,10 @@ app.post("/api/cadastro", async (req, res) => {
       geographicStructureCode = "";
     }
 
-    const senha = gerarSenhaAleatoria();
     const { resposta, corpo } = await cadastrarRevendedor(
       token,
       validacao.dados,
-      geographicStructureCode,
-      senha
+      geographicStructureCode
     );
     if (!resposta.ok) {
       const bruta = extrairMensagem(corpo);
@@ -988,27 +1148,34 @@ app.post("/api/cadastro", async (req, res) => {
       }
     }
 
-    let senhaGravada = false;
+    const senha = gerarSenhaAleatoria();
+    let emailEnviado = false;
     try {
-      const gravacao = await definirSenha(token, {
+      const dinamize = await enviarAcessoDinamize({
+        nome: validacao.dados.nome,
+        email: validacao.dados.email,
         senha,
         codigo: codigoFinal
       });
-      senhaGravada = Boolean(gravacao.ok);
-    } catch (erroSenha) {
-      console.warn("[senha] PUT people erro", erroSenha.message);
+      emailEnviado = Boolean(dinamize.ok);
+      if (dinamize.configurada && !dinamize.ok) {
+        console.warn("[dinamize] cadastro sem confirmação de envio", validacao.dados.email);
+      }
+    } catch (erroDinamize) {
+      console.warn("[dinamize] cadastro erro", erroDinamize.message);
     }
     emailsVerificados.delete(validacao.dados.email);
 
     return res.json({
       ok: true,
-      login: codigoFinal || validacao.dados.email,
+      login: validacao.dados.email,
       email: validacao.dados.email,
-      senha: senhaGravada ? senha : "",
+      senha,
       codigo: codigoFinal,
-      message: senhaGravada
-        ? "Cadastro criado. Guarde seu usuário e senha agora."
-        : "Cadastro criado. A senha de acesso foi enviada para o seu e-mail."
+      emailEnviado,
+      message: emailEnviado
+        ? "Cadastro criado. Enviamos a senha para este e-mail. O usuário é o e-mail."
+        : "Cadastro criado. Guarde usuário e senha. O e-mail da Dinamize ainda não confirmou o envio."
     });
   } catch (erro) {
     return res.status(502).json({
