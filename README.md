@@ -91,6 +91,7 @@ Copie `api/.env.example` para `api/.env` **no servidor**. Esse arquivo **não va
 | `DINAMIZE_WEBHOOK_URL` | webhook de entrada da automação que envia o e-mail de acesso |
 | `DINAMIZE_USER` / `DINAMIZE_PASSWORD` / `DINAMIZE_CLIENT_CODE` | autenticação da API (`POST /auth`) |
 | `DINAMIZE_LIST_CODE` | lista de contatos com os campos `usuario`, `senha`, `codigo`, `escritorio_url` |
+| `EMAIL_ASSET_BASE` | URL pública do Node para as imagens do e-mail, ex. `https://querorevender.loccitaneaubresil.com` |
 
 Não use `https://api.gera.com.br` como `GERA_BASE_URL`. Isso é só o catálogo da documentação.
 
@@ -116,12 +117,12 @@ Em produção: `https://querorevender.loccitaneaubresil.com` (ou o domínio fina
 
 No painel da Dinamize:
 
-1. Crie uma lista com os campos `usuario`, `senha`, `codigo` e `escritorio_url` (ou informe os códigos `cmp*` no `.env`).
-2. Crie a peça de e-mail usando esses campos.
+1. Crie uma lista com os campos `usuario`, `senha`, `codigo`, `escritorio_url` e `asset_base` (ou informe os códigos `cmp*` no `.env`).
+2. Cole a peça de `emails/acesso-dinamize.html`. As imagens ficam em `emails/assets/` e precisam estar no ar no mesmo domínio do Node (`EMAIL_ASSET_BASE`).
 3. Crie uma automação disparada por **webhook de entrada** ou por **contato adicionado/atualizado**.
 4. Coloque `DINAMIZE_WEBHOOK_URL` e/ou usuário + senha + `client_code` + `list_code` no `.env` do servidor.
 
-O proxy autentica em `POST https://api.dinamize.com/auth`, grava o contato em `/emkt/contact/add` e, se houver webhook, dispara a automação com `{ email, nome, usuario, senha, codigo, escritorio_url }`.
+O proxy autentica em `POST https://api.dinamize.com/auth`, grava o contato em `/emkt/contact/add` e, se houver webhook, dispara a automação com `{ email, nome, usuario, senha, codigo, escritorio_url, asset_base }`. Preview local: `http://localhost:3000/api/email-preview`.
 
 ## Local
 

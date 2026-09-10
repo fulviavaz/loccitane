@@ -1,5 +1,6 @@
 require("dotenv").config();
 const crypto = require("crypto");
+const fs = require("fs");
 const path = require("path");
 const express = require("express");
 
@@ -40,6 +41,8 @@ const DINAMIZE_FIELD_USUARIO = String(process.env.DINAMIZE_FIELD_USUARIO || "usu
 const DINAMIZE_FIELD_SENHA = String(process.env.DINAMIZE_FIELD_SENHA || "senha").trim();
 const DINAMIZE_FIELD_CODIGO = String(process.env.DINAMIZE_FIELD_CODIGO || "codigo").trim();
 const DINAMIZE_FIELD_ESCRITORIO = String(process.env.DINAMIZE_FIELD_ESCRITORIO || "escritorio_url").trim();
+const EMAIL_ASSET_BASE = String(process.env.EMAIL_ASSET_BASE || process.env.INDICO_ORIGIN || "").replace(/\/$/, "");
+const EMAIL_TEMPLATE_PATH = path.join(__dirname, "..", "emails", "acesso-dinamize.html");
 
 const tokenCache = { token: "", expiresAt: 0 };
 const dinamizeTokenCache = { token: "", expiresAt: 0 };
@@ -692,32 +695,36 @@ const dinamizePronta = () => Boolean(
   || (DINAMIZE_USER && DINAMIZE_PASSWORD && DINAMIZE_CLIENT_CODE && DINAMIZE_LIST_CODE)
 );
 
-const montarAcessoEmail = ({ nome, email, senha, codigo }) => ({
+const primeiroNome = (nome) => String(nome || "").trim().split(/\s+/)[0] || "";
+
+const escapeHtml = (valor) => String(valor || "")
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;");
+
+const montarAcessoEmail = ({ nome, email, senha, codigo }, assetBase = EMAIL_ASSET_BASE) => ({
   event: "cadastro_revendedora",
   email,
-  nome,
-  first_name: nome,
+  nome: primeiroNome(nome),
+  first_name: primeiroNome(nome),
   usuario: email,
   senha,
   codigo: codigo || "",
-  escritorio_url: ESCRITORIO_URL
+  escritorio_url: ESCRITORIO_URL,
+  asset_base: String(assetBase || "").replace(/\/$/, "")
 });
 
-const htmlAcessoDinamize = (acesso) => `<!DOCTYPE html>
-<html lang="pt-BR">
-<body style="margin:0;padding:24px;background:#f7f2ec;font-family:Arial,sans-serif;color:#3a2418;">
-  <div style="max-width:560px;margin:0 auto;background:#fff;padding:28px;border-radius:16px;">
-    <p style="margin:0 0 8px;letter-spacing:.08em;text-transform:uppercase;font-size:12px;">L'Occitane au Brésil</p>
-    <h1 style="margin:0 0 16px;font-size:22px;">Seu cadastro de revendedora</h1>
-    <p style="margin:0 0 16px;">Guarde estes dados para entrar no Escritório Virtual:</p>
-    <p style="margin:0 0 8px;"><strong>Usuário:</strong> ${acesso.usuario}</p>
-    <p style="margin:0 0 8px;"><strong>Senha:</strong> ${acesso.senha}</p>
-    ${acesso.codigo ? `<p style="margin:0 0 8px;"><strong>Código de revendedora:</strong> ${acesso.codigo}</p>` : ""}
-    <p style="margin:16px 0;"><a href="${acesso.escritorio_url}" style="color:#b42318;">Abrir Escritório Virtual</a></p>
-    <p style="margin:0;font-size:13px;">Se o login recusar a senha, use Esqueci senha na tela de login.</p>
-  </div>
-</body>
-</html>`;
+const htmlAcessoDinamize = (acesso) => {
+  const html = fs.readFileSync(EMAIL_TEMPLATE_PATH, "utf8");
+  return html
+    .replaceAll("{{Campo:Nome}}", escapeHtml(acesso.first_name || acesso.nome))
+    .replaceAll("{{Campo:usuário}}", escapeHtml(acesso.usuario))
+    .replaceAll("{{Campo:senha}}", escapeHtml(acesso.senha))
+    .replaceAll("{{Campo:código}}", escapeHtml(acesso.codigo))
+    .replaceAll("{{Campo:escritorio_url}}", escapeHtml(acesso.escritorio_url))
+    .replaceAll("{{Campo:asset_base}}", String(acesso.asset_base || "").replace(/\/$/, ""));
+};
 
 const extrairTokenDinamize = (corpo) => {
   if (!corpo || typeof corpo !== "object") return "";
@@ -778,6 +785,7 @@ const gravarContatoDinamize = async (token, acesso) => {
   contato[DINAMIZE_FIELD_SENHA] = acesso.senha;
   contato[DINAMIZE_FIELD_CODIGO] = acesso.codigo;
   contato[DINAMIZE_FIELD_ESCRITORIO] = acesso.escritorio_url;
+  contato.asset_base = acesso.asset_base;
 
   let { resposta, corpo } = await chamarDinamize(token, "/emkt/contact/add", contato);
   if (!resposta.ok && /exist|already|duplic|cadastr/i.test(extrairMensagem(corpo))) {
@@ -827,9 +835,18 @@ const dispararEmailDinamize = async (token, acesso) => {
   return true;
 };
 
-const enviarAcessoDinamize = async ({ nome, email, senha, codigo }) => {
+const origemPublica = (req) => {
+  if (EMAIL_ASSET_BASE) return EMAIL_ASSET_BASE;
+  const origin = String(req?.get?.("origin") || "").replace(/\/$/, "");
+  if (origin) return origin;
+  const host = req?.get?.("host");
+  if (host) return `${req.protocol}://${host}`;
+  return "";
+};
+
+const enviarAcessoDinamize = async ({ nome, email, senha, codigo, assetBase }) => {
   if (!dinamizePronta()) return { ok: false, configurada: false };
-  const acesso = montarAcessoEmail({ nome, email, senha, codigo });
+  const acesso = montarAcessoEmail({ nome, email, senha, codigo }, assetBase);
   let ok = false;
 
   if (DINAMIZE_WEBHOOK_URL) {
@@ -999,6 +1016,16 @@ app.get("/api/config", (_req, res) => {
     recaptchaSiteKey: RECAPTCHA_SITE_KEY,
     escritorioUrl: ESCRITORIO_URL
   });
+});
+
+app.get("/api/email-preview", (req, res) => {
+  const acesso = montarAcessoEmail({
+    nome: "Maria Silva",
+    email: "maria.silva@gmail.com",
+    senha: "Locci@Ab3xY7",
+    codigo: "10709164"
+  }, origemPublica(req));
+  res.type("html").send(htmlAcessoDinamize(acesso));
 });
 
 app.post("/api/verificar", async (req, res) => {
@@ -1260,7 +1287,8 @@ app.post("/api/cadastro", async (req, res) => {
         nome: validacao.dados.nome,
         email: validacao.dados.email,
         senha,
-        codigo: codigoFinal
+        codigo: codigoFinal,
+        assetBase: origemPublica(req)
       });
       emailEnviado = Boolean(dinamize.ok);
       if (dinamize.configurada && !dinamize.ok) {

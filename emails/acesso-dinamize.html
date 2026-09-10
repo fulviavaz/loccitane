@@ -5,56 +5,151 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cadastro concluído</title>
 </head>
-<body style="margin:0;padding:0;background:#f7f2ec;font-family:Arial,Helvetica,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f2ec;padding:24px 12px;">
+<body style="margin:0;padding:0;background:#FFF7F2;font-family:Arial,Helvetica,sans-serif;color:#222222;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFF7F2;">
     <tr>
-      <td align="center">
-        <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;">
+      <td align="center" style="padding:0;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#FFF7F2;">
           <tr>
-            <td style="background:#C02031;padding:20px 28px;color:#ffffff;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;">
-              L'Occitane au Brésil
+            <td style="padding:0;">
+              <img src="{{Campo:asset_base}}/emails/assets/hero-chegou.jpg" alt="Que bom que você chegou!" width="600" style="display:block;width:100%;max-width:600px;height:auto;border:0;" />
             </td>
           </tr>
           <tr>
-            <td style="padding:28px 28px 8px;color:#3a2418;">
-              <h1 style="margin:0 0 16px;font-size:24px;line-height:1.3;font-weight:700;">
-                {{Campo:Nome}}, seu cadastro foi concluído!
+            <td style="padding:36px 32px 8px;text-align:center;">
+              <h1 style="margin:0;font-size:28px;line-height:1.25;font-weight:800;color:#111111;">
+                {{Campo:Nome}}, seu cadastro foi aprovado!<br />Você já pode fazer o seu primeiro pedido!
               </h1>
-              <p style="margin:0 0 12px;font-size:16px;line-height:1.5;">
-                Você já pode fazer o seu primeiro pedido.
-              </p>
-              <p style="margin:0 0 20px;font-size:15px;line-height:1.6;">
-                É oficial: agora você faz parte do Programa de Revenda da L'Occitane au Brésil.
-                Estou muito feliz em te receber e mal posso esperar para acompanhar suas conquistas.
-              </p>
-              <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">
-                Estes são os seus dados de acesso para o Escritório Virtual:
-              </p>
             </td>
           </tr>
           <tr>
-            <td style="padding:0 28px 24px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f7f2ec;border-radius:12px;">
+            <td style="padding:16px 48px 0;text-align:center;font-size:15px;line-height:1.6;color:#333333;">
+              É oficial: agora você faz parte do Programa de Revenda da L'Occitane au Brésil. Estou muito feliz em te receber e mal posso esperar para acompanhar suas conquistas.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:18px 48px 0;text-align:center;font-size:15px;line-height:1.6;color:#333333;">
+              E tem mais uma ótima notícia: seu primeiro pedido já está liberado!
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 48px 0;text-align:center;font-size:15px;line-height:1.6;color:#333333;">
+              Esses são os seus dados de acesso para o ESCRITÓRIO VIRTUAL:
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:18px 48px 0;text-align:center;font-size:16px;line-height:1.8;color:#111111;">
+              <strong>ID/LOGIN:</strong> {{Campo:código}}<br />
+              <strong>SENHA:</strong> {{Campo:senha}}
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:22px 32px 8px;">
+              <a href="{{Campo:escritorio_url}}" style="display:inline-block;background:#C8102E;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:0.04em;padding:14px 28px;border-radius:6px;">
+                Acesse o ESCRITÓRIO VIRTUAL
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 48px 8px;text-align:center;font-size:15px;line-height:1.6;color:#333333;">
+              Boas-vindas e bem-vindo(a) à nossa comunidade! ♥
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 24px 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="padding:18px 20px;color:#3a2418;font-size:15px;line-height:1.7;">
-                    <strong>Usuário (e-mail):</strong> {{Campo:usuário}}<br />
-                    <strong>Senha:</strong> {{Campo:senha}}<br />
-                    <strong>Código de revendedora:</strong> {{Campo:código}}
+                  <td width="50%" style="padding:0 6px;" valign="top">
+                    <img src="{{Campo:asset_base}}/emails/assets/banner-caju.png" alt="Caju" width="270" style="display:block;width:100%;max-width:270px;height:auto;border:0;border-radius:16px;" />
+                  </td>
+                  <td width="50%" style="padding:0 6px;" valign="top">
+                    <img src="{{Campo:asset_base}}/emails/assets/banner-roma.png" alt="Romã" width="270" style="display:block;width:100%;max-width:270px;height:auto;border:0;border-radius:16px;" />
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
           <tr>
-            <td style="padding:0 28px 28px;" align="center">
-              <a href="{{Campo:escritorio_url}}" style="display:inline-block;background:#C02031;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:14px 28px;border-radius:999px;">
-                Acesse o escritório virtual
+            <td style="padding:36px 32px 8px;text-align:center;">
+              <p style="margin:0 0 8px;font-size:20px;font-weight:700;color:#111111;">Precisa de alguma ajuda?</p>
+              <p style="margin:0;font-size:15px;line-height:1.5;color:#333333;">Minha equipe está prontinha para te apoiar</p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:18px 32px 8px;">
+              <a href="https://wa.me/5511975743863" style="display:inline-block;background:#ffffff;color:#C8102E;text-decoration:none;font-size:14px;font-weight:700;padding:12px 36px;border:1px solid #C8102E;border-radius:28px;">
+                Fale com o suporte
               </a>
             </td>
           </tr>
           <tr>
-            <td style="padding:0 28px 28px;color:#7a6558;font-size:13px;line-height:1.5;">
-              Se o login recusar a senha, use Esqueci senha na tela de login do Escritório Virtual.
+            <td style="padding:36px 24px 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="42%" valign="middle" style="padding:0 12px 0 8px;">
+                    <p style="margin:0 0 8px;font-size:16px;font-weight:700;color:#111111;">
+                      <img src="{{Campo:asset_base}}/emails/assets/icon-youtube.jpg" alt="" width="18" height="18" style="vertical-align:middle;border:0;" />
+                      Fique por dentro
+                    </p>
+                    <p style="margin:0;font-size:13px;line-height:1.5;color:#555555;">Acompanhe as lives mensais pelo canal do Youtube.</p>
+                  </td>
+                  <td width="58%" valign="middle" style="padding:0 8px 0 12px;">
+                    <a href="https://www.youtube.com/loccitaneaubresil" style="text-decoration:none;">
+                      <img src="{{Campo:asset_base}}/emails/assets/live-verao.jpg" alt="A live já vai começar" width="300" style="display:block;width:100%;max-width:300px;height:auto;border:0;border-radius:8px;" />
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:40px 24px 16px;border-top:1px solid #F0E4DC;margin-top:24px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="28%" valign="middle" style="padding:0 8px 16px 0;">
+                    <img src="{{Campo:asset_base}}/emails/assets/logo-revenda.png" alt="Revenda L'Occitane au Brésil" width="72" style="display:block;border:0;" />
+                  </td>
+                  <td width="18%" valign="middle" style="padding:0 8px 16px;">
+                    <img src="{{Campo:asset_base}}/emails/assets/logo-bcorp.png" alt="Empresa B Certificada" width="52" style="display:block;border:0;" />
+                  </td>
+                  <td width="54%" valign="middle" style="padding:0 0 16px 8px;font-size:10px;line-height:1.4;color:#666666;text-align:center;">
+                    <a href="{{Campo:escritorio_url}}" style="color:#666666;text-decoration:none;">
+                      <img src="{{Campo:asset_base}}/emails/assets/icon-escritorio.png" alt="" width="18" style="display:block;margin:0 auto 4px;border:0;" />
+                      ESCRITÓRIO VIRTUAL
+                    </a>
+                    &nbsp;&nbsp;
+                    <a href="https://reve.loccitaneaubresil.com/" style="color:#666666;text-decoration:none;">
+                      <img src="{{Campo:asset_base}}/emails/assets/icon-revista.png" alt="" width="18" style="display:inline-block;border:0;vertical-align:middle;" />
+                      REVISTA DIGITAL
+                    </a>
+                    &nbsp;&nbsp;
+                    <a href="https://wa.me/5511975743863" style="color:#666666;text-decoration:none;">
+                      <img src="{{Campo:asset_base}}/emails/assets/icon-whatsapp.png" alt="" width="16" style="display:inline-block;border:0;vertical-align:middle;" />
+                      FALE CONOSCO
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding:8px 0 0;">
+                    <a href="https://www.tiktok.com/@loccitaneaubresil" style="text-decoration:none;margin:0 8px;">
+                      <img src="{{Campo:asset_base}}/emails/assets/icon-tiktok.png" alt="TikTok" width="18" style="border:0;" />
+                    </a>
+                    <a href="https://www.instagram.com/loccitaneaubresil/" style="text-decoration:none;margin:0 8px;">
+                      <img src="{{Campo:asset_base}}/emails/assets/icon-instagram.png" alt="Instagram" width="18" style="border:0;" />
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 28px 32px;text-align:center;font-size:10px;line-height:1.6;color:#8A7A72;">
+              L'OCCITANE AU BRÉSIL © 2024<br />
+              Espaço do Banho e Aromas Ltda<br />
+              Av. Odila Chaves Rodrigues, 1277 — Gleba A1 — Galpão 3 e 4<br />
+              Distrito Industrial, Jundiaí, SP — CNPJ 01.512.104/0060-06
             </td>
           </tr>
         </table>
