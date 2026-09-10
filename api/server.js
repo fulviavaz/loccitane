@@ -547,76 +547,77 @@ const extrairAccessKey = (corpo) => {
   return "";
 };
 
+const extrairUserCode = (corpo) => {
+  const visitados = new Set();
+  const fila = [corpo];
+  while (fila.length) {
+    const atual = fila.shift();
+    if (!atual || typeof atual !== "object" || visitados.has(atual)) continue;
+    visitados.add(atual);
+    const codigo = atual.userCode ?? atual.user_code ?? atual.UserCode;
+    if (codigo !== undefined && codigo !== null && codigo !== "") return String(codigo);
+    Object.values(atual).forEach((valor) => {
+      if (valor && typeof valor === "object") fila.push(valor);
+    });
+  }
+  return "";
+};
+
 const obterTokenPorAccessKey = async ({ accessKey, userCode }) => {
-  const tentativas = [];
-  if (accessKey) tentativas.push({ access_key: accessKey });
-  if (userCode) tentativas.push({ user_code: String(userCode) });
-  if (!tentativas.length) {
-    const erro = new Error("Cadastro sem accessKey nem userCode.");
+  if (!accessKey || !userCode) {
+    const erro = new Error("Cadastro sem accessKey ou userCode.");
     erro.status = 502;
     throw erro;
   }
 
-  let ultimoErro = "Falha ao autenticar a revendedora recém-cadastrada.";
-  let ultimoStatus = 502;
-  for (const extra of tentativas) {
-    const resposta = await fetch(joinUrl(BASE_URL, TOKEN_PATH), {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "access_key",
-        client_id: process.env.GERA_CLIENT_ID || "",
-        client_secret: process.env.GERA_CLIENT_SECRET || "",
-        ...extra
-      })
-    });
-    const corpo = await lerJsonSeguro(resposta);
-    const token = corpo.access_token || corpo.accessToken || corpo.token;
-    if (resposta.ok && token) return token;
-    ultimoErro = extrairMensagem(corpo) || ultimoErro;
-    ultimoStatus = resposta.status || ultimoStatus;
+  const resposta = await fetch(joinUrl(BASE_URL, TOKEN_PATH), {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "access_key",
+      client_id: process.env.GERA_CLIENT_ID || "",
+      client_secret: process.env.GERA_CLIENT_SECRET || "",
+      user_code: String(userCode),
+      access_key: accessKey
+    })
+  });
+  const corpo = await lerJsonSeguro(resposta);
+  const token = corpo.access_token || corpo.accessToken || corpo.token;
+  if (!resposta.ok || !token) {
+    const erro = new Error(extrairMensagem(corpo) || "Falha ao autenticar a revendedora recém-cadastrada.");
+    erro.status = resposta.status || 502;
+    throw erro;
   }
-  const erro = new Error(ultimoErro);
-  erro.status = ultimoStatus;
-  throw erro;
+  return token;
 };
 
 const alterarSenhaRevendedora = async (tokenRevendedora, senha) => {
   const payload = { newPassword: senha };
   if (APPLICATION_CODE) payload.applicationCode = Number(APPLICATION_CODE) || APPLICATION_CODE;
-  const tentativas = [
-    { headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) },
-    { headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(payload) }
-  ];
-  let ultimoErro = "Falha ao definir a senha da revendedora.";
-  let ultimoStatus = 502;
-  for (const tentativa of tentativas) {
-    const resposta = await fetch(joinUrl(BASE_URL, PASSWORD_PATH), {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${tokenRevendedora}`,
-        ...tentativa.headers
-      },
-      body: tentativa.body
-    });
-    const corpo = await lerJsonSeguro(resposta);
-    console.log("[senha] PATCH", resposta.status);
-    if (resposta.status === 200 || resposta.status === 201) return true;
-    ultimoErro = extrairMensagem(corpo) || ultimoErro;
-    ultimoStatus = resposta.status || ultimoStatus;
-    if (resposta.status === 401 || resposta.status === 403) break;
+  const resposta = await fetch(joinUrl(BASE_URL, PASSWORD_PATH), {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${tokenRevendedora}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+  const corpo = await lerJsonSeguro(resposta);
+  console.log("[senha] PATCH", resposta.status);
+  if (resposta.status !== 200 && resposta.status !== 201 && resposta.status !== 204) {
+    const erro = new Error(extrairMensagem(corpo) || "Falha ao definir a senha da revendedora.");
+    erro.status = resposta.status || 502;
+    throw erro;
   }
-  const erro = new Error(ultimoErro);
-  erro.status = ultimoStatus;
-  throw erro;
+  return true;
 };
 
 const definirSenhaInicial = async (corpoCadastro, senha, codigo) => {
   const accessKey = extrairAccessKey(corpoCadastro);
-  const userCode = extrairCodigoRevendedora(corpoCadastro) || codigo;
+  const userCode = extrairUserCode(corpoCadastro) || extrairCodigoRevendedora(corpoCadastro) || codigo;
   console.log("[senha] accessKey", accessKey ? "sim" : "nao", "userCode", userCode ? "sim" : "nao");
-  if (!accessKey && !userCode) {
-    console.warn("[senha] cadastro sem accessKey e sem userCode");
+  if (!accessKey || !userCode) {
+    console.warn("[senha] cadastro sem accessKey ou userCode");
     return false;
   }
   const tokenRevendedora = await obterTokenPorAccessKey({ accessKey, userCode });

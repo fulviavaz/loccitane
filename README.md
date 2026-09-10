@@ -110,7 +110,7 @@ Em produção: `https://querorevender.loccitaneaubresil.com` (ou o domínio fina
 3. `POST /api/otp/gerar` envia o código de 6 dígitos (Indico).
 4. `POST /api/otp/validar` confere o PIN.
 5. `POST /api/lead` grava o lead no destino Indico (`POST /api/v1/leads`).
-6. `POST /api/cadastro` cria o revendedor na Gera (`POST /api/Public/Sellers`), lê o `accessKey` do retorno, troca por um token da revendedora (`grant_type=access_key`) e define a senha `Locci@` com `PATCH /api/password`. Depois mostra o acesso na tela e envia o mesmo pela Dinamize.
+6. `POST /api/cadastro` cria o revendedor na Gera (`POST /api/Public/Sellers`), lê o `userCode` e o `accessKey` do retorno, pede o token com os dois no mesmo `POST /api/token` (`grant_type=access_key`) e define a senha `Locci@` com `PATCH /api/password`. Depois mostra o acesso na tela e envia o mesmo pela Dinamize.
 
 ## Dinamize
 
