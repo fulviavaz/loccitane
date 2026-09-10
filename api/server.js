@@ -547,25 +547,38 @@ const extrairAccessKey = (corpo) => {
   return "";
 };
 
-const obterTokenPorAccessKey = async (accessKey) => {
-  const resposta = await fetch(joinUrl(BASE_URL, TOKEN_PATH), {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "access_key",
-      client_id: process.env.GERA_CLIENT_ID || "",
-      client_secret: process.env.GERA_CLIENT_SECRET || "",
-      access_key: accessKey
-    })
-  });
-  const corpo = await lerJsonSeguro(resposta);
-  const token = corpo.access_token || corpo.accessToken || corpo.token;
-  if (!resposta.ok || !token) {
-    const erro = new Error(extrairMensagem(corpo) || "Falha ao autenticar a revendedora recém-cadastrada.");
-    erro.status = resposta.status || 502;
+const obterTokenPorAccessKey = async ({ accessKey, userCode }) => {
+  const tentativas = [];
+  if (accessKey) tentativas.push({ access_key: accessKey });
+  if (userCode) tentativas.push({ user_code: String(userCode) });
+  if (!tentativas.length) {
+    const erro = new Error("Cadastro sem accessKey nem userCode.");
+    erro.status = 502;
     throw erro;
   }
-  return token;
+
+  let ultimoErro = "Falha ao autenticar a revendedora recém-cadastrada.";
+  let ultimoStatus = 502;
+  for (const extra of tentativas) {
+    const resposta = await fetch(joinUrl(BASE_URL, TOKEN_PATH), {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "access_key",
+        client_id: process.env.GERA_CLIENT_ID || "",
+        client_secret: process.env.GERA_CLIENT_SECRET || "",
+        ...extra
+      })
+    });
+    const corpo = await lerJsonSeguro(resposta);
+    const token = corpo.access_token || corpo.accessToken || corpo.token;
+    if (resposta.ok && token) return token;
+    ultimoErro = extrairMensagem(corpo) || ultimoErro;
+    ultimoStatus = resposta.status || ultimoStatus;
+  }
+  const erro = new Error(ultimoErro);
+  erro.status = ultimoStatus;
+  throw erro;
 };
 
 const alterarSenhaRevendedora = async (tokenRevendedora, senha) => {
@@ -588,13 +601,15 @@ const alterarSenhaRevendedora = async (tokenRevendedora, senha) => {
   return true;
 };
 
-const definirSenhaInicial = async (corpoCadastro, senha) => {
+const definirSenhaInicial = async (corpoCadastro, senha, codigo) => {
   const accessKey = extrairAccessKey(corpoCadastro);
-  if (!accessKey) {
-    console.warn("[senha] cadastro sem accessKey");
+  const userCode = extrairCodigoRevendedora(corpoCadastro) || codigo;
+  console.log("[senha] accessKey", accessKey ? "sim" : "nao", "userCode", userCode ? "sim" : "nao");
+  if (!accessKey && !userCode) {
+    console.warn("[senha] cadastro sem accessKey e sem userCode");
     return false;
   }
-  const tokenRevendedora = await obterTokenPorAccessKey(accessKey);
+  const tokenRevendedora = await obterTokenPorAccessKey({ accessKey, userCode });
   await alterarSenhaRevendedora(tokenRevendedora, senha);
   return true;
 };
@@ -1218,9 +1233,11 @@ app.post("/api/cadastro", async (req, res) => {
     }
 
     const senha = gerarSenhaAleatoria();
+    const chavesCadastro = corpo && typeof corpo === "object" ? Object.keys(corpo).slice(0, 20).join(",") : typeof corpo;
+    console.log("[cadastro] retorno", resposta.status, chavesCadastro);
     let senhaDefinida = false;
     try {
-      senhaDefinida = await definirSenhaInicial(corpo, senha);
+      senhaDefinida = await definirSenhaInicial(corpo, senha, codigoFinal);
       if (senhaDefinida) console.log("[senha] PATCH ok para a revendedora recém-cadastrada");
     } catch (erroSenha) {
       console.warn("[senha] PATCH falhou", erroSenha.status || "", String(erroSenha.message || "").slice(0, 160));
@@ -1257,6 +1274,7 @@ app.post("/api/cadastro", async (req, res) => {
       codigo: codigoFinal,
       senhaDefinida,
       emailEnviado,
+      escritorioUrl: ESCRITORIO_URL,
       message
     });
   } catch (erro) {

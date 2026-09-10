@@ -1634,7 +1634,7 @@
             <div class="form__aviso" id="lead-existe-aviso" hidden>
               <strong>Este CPF ou e-mail já está cadastrado.</strong>
               <span id="lead-existe-msg">Entre no Escritório Virtual para acessar sua conta.</span>
-              <a class="btn" id="lead-ir-gera" href="https://revendedor.loccitaneaubresil.com/" target="_blank" rel="noopener">Entrar no Escritório Virtual</a>
+              <a class="btn js-escritorio" id="lead-ir-gera" href="https://hmlgeraad.revendedorloccitaneaubresil.com/" target="_blank" rel="noopener">Entrar no Escritório Virtual</a>
             </div>
             <button class="btn" id="lead-submit" type="submit">Quero começar a vender</button>
             <p class="form__note">Validamos CEP, e-mail e CPF. Se estiver tudo certo, enviamos um código para o seu e-mail.</p>
@@ -1687,7 +1687,8 @@
               </div>
             </div>
             <p class="form__note" id="lead-senha-nota">O usuário é o e-mail. Enviamos a senha para esta caixa de entrada.</p>
-            <a class="btn" href="https://revendedor.loccitaneaubresil.com/" target="_blank" rel="noopener">Abrir Escritório Virtual</a>
+            <p class="form__note" id="lead-escritorio-nota" hidden></p>
+            <a class="btn js-escritorio" id="lead-abrir-ev" href="https://hmlgeraad.revendedorloccitaneaubresil.com/" target="_blank" rel="noopener">Abrir Escritório Virtual</a>
           </div>
         </form>
       </div>
@@ -2028,9 +2029,22 @@
     const validarOtpBtn = document.getElementById("lead-validar-otp");
     const reenviarOtpBtn = document.getElementById("lead-reenviar-otp");
     let recaptchaSiteKey = "";
-    let escritorioUrl = "https://revendedor.loccitaneaubresil.com/";
+    let escritorioUrl = "https://hmlgeraad.revendedorloccitaneaubresil.com/";
     let payloadAtual = null;
     let cooldownReenvio = null;
+
+    const aplicarEscritorioUrl = (url) => {
+      if (url) escritorioUrl = url;
+      document.querySelectorAll(".js-escritorio").forEach((link) => {
+        link.href = escritorioUrl;
+      });
+      const nota = document.getElementById("lead-escritorio-nota");
+      if (nota) {
+        nota.hidden = false;
+        nota.textContent = `Use este endereço do HML: ${escritorioUrl}`;
+      }
+    };
+    aplicarEscritorioUrl();
 
     const soDigitos = (valor) => String(valor || "").replace(/\D/g, "");
     const normalizarEmail = (valor) => valor.trim().toLowerCase();
@@ -2381,8 +2395,7 @@
         intro: "Leva menos de 2 minutos. Depois é só escolher os produtos e vender."
       });
       mostrarStatus("error", mensagem || "Já existe um cadastro com este CPF ou e-mail.");
-      const irGera = document.getElementById("lead-ir-gera");
-      if (irGera) irGera.href = escritorioUrl;
+      aplicarEscritorioUrl();
       aviso?.scrollIntoView({ behavior: "smooth", block: "center" });
     };
 
@@ -2479,6 +2492,7 @@
           ? "O cadastro foi criado, mas a senha ainda não entrou no Escritório Virtual. Use Esqueci senha com este e-mail."
           : "O usuário é o e-mail. Enviamos a mesma senha para esta caixa de entrada.";
       }
+      aplicarEscritorioUrl(data.escritorioUrl || escritorioUrl);
       irParaPasso("sucesso", {
         titulo: "Cadastro concluído",
         intro: data.message || "Guarde seu acesso e entre no Escritório Virtual."
@@ -2488,7 +2502,7 @@
 
     fetch("/api/config").then((res) => res.json()).then((config) => {
       recaptchaSiteKey = config.recaptchaSiteKey || "";
-      escritorioUrl = config.escritorioUrl || escritorioUrl;
+      aplicarEscritorioUrl(config.escritorioUrl || escritorioUrl);
       if (recaptchaSiteKey) carregarRecaptcha(recaptchaSiteKey).catch(() => {});
     }).catch(() => {});
 
@@ -2661,6 +2675,7 @@
       document.getElementById("lead-senha").textContent = "Locci@Ab3xY7";
       const senhaNota = document.getElementById("lead-senha-nota");
       if (senhaNota) senhaNota.textContent = "O usuário é o e-mail. Enviamos a mesma senha para esta caixa de entrada.";
+      aplicarEscritorioUrl();
       irParaPasso("sucesso", {
         titulo: "Cadastro concluído",
         intro: "Cadastro criado. Enviamos a senha para este e-mail. O usuário é o e-mail."
