@@ -22,10 +22,13 @@ const PASSWORD_PATH = !passwordPathEnv || /\/api\/people\//i.test(passwordPathEn
   ? "/api/password"
   : passwordPathEnv;
 const APPLICATION_CODE = String(process.env.GERA_APPLICATION_CODE || "").trim();
-const ESCRITORIO_URL = process.env.GERA_ESCRITORIO_URL
+const ESCRITORIO_URL_BASE = process.env.GERA_ESCRITORIO_URL
   || (BASE_URL.includes("hml")
     ? "https://hmlgeraad.revendedorloccitaneaubresil.com/"
     : "https://revendedor.loccitaneaubresil.com/");
+const ESCRITORIO_URL = /#!\/?$/.test(String(ESCRITORIO_URL_BASE).replace(/\/$/, ""))
+  ? String(ESCRITORIO_URL_BASE).replace(/\/?$/, "/")
+  : `${String(ESCRITORIO_URL_BASE).replace(/\/$/, "")}/#!/`;
 const SENHA_PREFIXO = "Locci@";
 const SENHA_LETRAS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
 const SENHA_NUMEROS = "23456789";
@@ -713,13 +716,22 @@ const escapeHtml = (valor) => String(valor || "")
 const montarAcessoEmail = ({ nome, email, senha, codigo }, assetBase = EMAIL_ASSET_BASE) => ({
   event: "cadastro_revendedora",
   email,
-  nome: primeiroNome(nome),
+  nome: String(nome || "").trim() || primeiroNome(nome),
   first_name: primeiroNome(nome),
   usuario: email,
   senha,
   codigo: codigo || "",
   escritorio_url: ESCRITORIO_URL,
   asset_base: String(assetBase || "").replace(/\/$/, "")
+});
+
+const payloadWebhookDinamize = (acesso) => ({
+  email: acesso.email,
+  nome: acesso.nome,
+  usuario: acesso.usuario,
+  senha: acesso.senha,
+  codigo: acesso.codigo,
+  escritorio_url: acesso.escritorio_url
 });
 
 const htmlAcessoDinamize = (acesso) => {
@@ -852,21 +864,27 @@ const origemPublica = (req) => {
 };
 
 const enviarAcessoDinamize = async ({ nome, email, senha, codigo, assetBase }) => {
-  if (!dinamizePronta()) return { ok: false, configurada: false };
+  if (!dinamizePronta()) return { ok: false, configurada: false, erro: "DINAMIZE_WEBHOOK_URL ausente no processo." };
   const acesso = montarAcessoEmail({ nome, email, senha, codigo }, assetBase);
   let ok = false;
+  let erro = "";
 
   if (DINAMIZE_WEBHOOK_URL) {
     try {
       const resposta = await fetch(DINAMIZE_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(acesso)
+        body: JSON.stringify(payloadWebhookDinamize(acesso))
       });
+      const corpo = await lerJsonSeguro(resposta);
       if (resposta.ok || resposta.status === 202 || resposta.status === 204) ok = true;
-      else console.warn("[dinamize] webhook", resposta.status);
-    } catch (erro) {
-      console.warn("[dinamize] webhook erro", erro.message);
+      else {
+        erro = `webhook ${resposta.status} ${extrairMensagem(corpo)}`.trim().slice(0, 180);
+        console.warn("[dinamize] webhook", erro);
+      }
+    } catch (falha) {
+      erro = `webhook erro ${falha.message}`.slice(0, 180);
+      console.warn("[dinamize]", erro);
     }
   }
 
@@ -876,12 +894,14 @@ const enviarAcessoDinamize = async ({ nome, email, senha, codigo, assetBase }) =
       const contatoOk = await gravarContatoDinamize(token, acesso);
       const emailOk = await dispararEmailDinamize(token, acesso);
       ok = ok || contatoOk || emailOk;
-    } catch (erro) {
-      console.warn("[dinamize] api erro", erro.message);
+      if (!ok && !erro) erro = "API Dinamize não confirmou contato nem envio.";
+    } catch (falha) {
+      if (!erro) erro = `api erro ${falha.message}`.slice(0, 180);
+      console.warn("[dinamize] api erro", falha.message);
     }
   }
 
-  return { ok, configurada: true };
+  return { ok, configurada: true, erro: ok ? "" : erro };
 };
 
 const origemIndico = (req) => req.get("origin") || INDICO_ORIGIN;
@@ -1015,6 +1035,7 @@ app.get("/api/health", (_req, res) => {
     geraConfigurada: Boolean(BASE_URL),
     geraTokenPath: TOKEN_PATH,
     indicoConfigurada: Boolean(INDICO_API_BASE && INDICO_DB_ID),
+    dinamizeConfigurada: dinamizePronta(),
     recaptcha: Boolean(RECAPTCHA_SITE_KEY)
   });
 });
@@ -1290,6 +1311,7 @@ app.post("/api/cadastro", async (req, res) => {
     }
 
     let emailEnviado = false;
+    let emailErro = "";
     try {
       const dinamize = await enviarAcessoDinamize({
         nome: validacao.dados.nome,
@@ -1299,11 +1321,13 @@ app.post("/api/cadastro", async (req, res) => {
         assetBase: origemPublica(req)
       });
       emailEnviado = Boolean(dinamize.ok);
+      emailErro = String(dinamize.erro || "");
       if (dinamize.configurada && !dinamize.ok) {
-        console.warn("[dinamize] cadastro sem confirmação de envio", validacao.dados.email);
+        console.warn("[dinamize] cadastro sem confirmação de envio", validacao.dados.email, emailErro);
       }
     } catch (erroDinamize) {
-      console.warn("[dinamize] cadastro erro", erroDinamize.message);
+      emailErro = String(erroDinamize.message || "").slice(0, 180);
+      console.warn("[dinamize] cadastro erro", emailErro);
     }
     emailsVerificados.delete(validacao.dados.email);
 
@@ -1321,6 +1345,7 @@ app.post("/api/cadastro", async (req, res) => {
       codigo: codigoFinal,
       senhaDefinida,
       emailEnviado,
+      emailErro,
       escritorioUrl: ESCRITORIO_URL,
       message
     });
