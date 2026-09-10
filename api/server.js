@@ -583,22 +583,32 @@ const obterTokenPorAccessKey = async ({ accessKey, userCode }) => {
 
 const alterarSenhaRevendedora = async (tokenRevendedora, senha) => {
   const payload = { newPassword: senha };
-  if (APPLICATION_CODE) payload.applicationCode = APPLICATION_CODE;
-  const resposta = await fetch(joinUrl(BASE_URL, PASSWORD_PATH), {
-    method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${tokenRevendedora}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
-  const corpo = await lerJsonSeguro(resposta);
-  if (!resposta.ok) {
-    const erro = new Error(extrairMensagem(corpo) || "Falha ao definir a senha da revendedora.");
-    erro.status = resposta.status || 502;
-    throw erro;
+  if (APPLICATION_CODE) payload.applicationCode = Number(APPLICATION_CODE) || APPLICATION_CODE;
+  const tentativas = [
+    { headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) },
+    { headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(payload) }
+  ];
+  let ultimoErro = "Falha ao definir a senha da revendedora.";
+  let ultimoStatus = 502;
+  for (const tentativa of tentativas) {
+    const resposta = await fetch(joinUrl(BASE_URL, PASSWORD_PATH), {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${tokenRevendedora}`,
+        ...tentativa.headers
+      },
+      body: tentativa.body
+    });
+    const corpo = await lerJsonSeguro(resposta);
+    console.log("[senha] PATCH", resposta.status);
+    if (resposta.status === 200 || resposta.status === 201) return true;
+    ultimoErro = extrairMensagem(corpo) || ultimoErro;
+    ultimoStatus = resposta.status || ultimoStatus;
+    if (resposta.status === 401 || resposta.status === 403) break;
   }
-  return true;
+  const erro = new Error(ultimoErro);
+  erro.status = ultimoStatus;
+  throw erro;
 };
 
 const definirSenhaInicial = async (corpoCadastro, senha, codigo) => {
