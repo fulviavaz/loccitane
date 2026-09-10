@@ -4,9 +4,14 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 
+const envTexto = (nome, padrao = "") => String(process.env[nome] ?? padrao)
+  .replace(/^\uFEFF/, "")
+  .trim()
+  .replace(/^['"]|['"]$/g, "");
+
 const PORT = Number(process.env.PORT) || 3000;
-const BASE_URL = String(process.env.GERA_BASE_URL || "").replace(/\/$/, "");
-const TOKEN_PATH = process.env.GERA_TOKEN_PATH || "/token";
+const BASE_URL = envTexto("GERA_BASE_URL").replace(/\/$/, "");
+const TOKEN_PATH = envTexto("GERA_TOKEN_PATH", "/api/token") || "/api/token";
 const SELLERS_PATH = process.env.GERA_SELLERS_PATH || "/api/Public/Sellers";
 const ZIPCODE_PATH = process.env.GERA_ZIPCODE_PATH || "/api/Public/GeographicalStructures?postalCode={cep}";
 const DOCUMENT_TYPE_CPF = process.env.GERA_DOCUMENT_TYPE_CPF || "2";
@@ -110,7 +115,7 @@ const mensagemAmigavel = (bruta, status) => {
   }
   if (/invalid_grant|usu[aá]rio ou senha/.test(texto)) {
     const ambiente = BASE_URL.includes("hml") ? "HML" : "produção";
-    return `As credenciais da API Gera foram recusadas. Peça o reset da senha do integrador de ${ambiente}.`;
+    return `A Gera recusou usuário ou senha do integrador de ${ambiente}. Confira GERA_USERNAME, GERA_PASSWORD e GERA_TOKEN_PATH=/api/token.`;
   }
   if (/invalid_client/.test(texto)) {
     return "O client da API Gera foi recusado. Confira o clientId e o clientSecret.";
@@ -198,17 +203,18 @@ const obterToken = async () => {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      grant_type: process.env.GERA_GRANT_TYPE || "password",
-      client_id: process.env.GERA_CLIENT_ID || "",
-      client_secret: process.env.GERA_CLIENT_SECRET || "",
-      username: process.env.GERA_USERNAME || "",
-      password: process.env.GERA_PASSWORD || ""
+      grant_type: envTexto("GERA_GRANT_TYPE", "password") || "password",
+      client_id: envTexto("GERA_CLIENT_ID"),
+      client_secret: envTexto("GERA_CLIENT_SECRET"),
+      username: envTexto("GERA_USERNAME"),
+      password: envTexto("GERA_PASSWORD")
     })
   });
 
   const corpo = await lerJsonSeguro(resposta);
   const token = corpo.access_token || corpo.accessToken || corpo.token;
   if (!resposta.ok || !token) {
+    console.warn("[token]", resposta.status, `${BASE_URL}${TOKEN_PATH}`, corpo.error || "", String(corpo.error_description || "").slice(0, 160));
     const erro = new Error(extrairMensagem(corpo) || "Falha ao obter token público.");
     erro.status = resposta.status || 502;
     throw erro;
@@ -579,8 +585,8 @@ const obterTokenPorAccessKey = async ({ accessKey, userCode }) => {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       grant_type: "access_key",
-      client_id: process.env.GERA_CLIENT_ID || "",
-      client_secret: process.env.GERA_CLIENT_SECRET || "",
+      client_id: envTexto("GERA_CLIENT_ID"),
+      client_secret: envTexto("GERA_CLIENT_SECRET"),
       user_code: String(userCode),
       access_key: accessKey
     })
@@ -1007,6 +1013,7 @@ app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
     geraConfigurada: Boolean(BASE_URL),
+    geraTokenPath: TOKEN_PATH,
     indicoConfigurada: Boolean(INDICO_API_BASE && INDICO_DB_ID),
     recaptcha: Boolean(RECAPTCHA_SITE_KEY)
   });
