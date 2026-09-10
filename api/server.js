@@ -109,7 +109,8 @@ const mensagemAmigavel = (bruta, status) => {
     return "O cadastro foi criado, mas ainda há pendências. Complete os dados no Escritório Virtual.";
   }
   if (/invalid_grant|usu[aá]rio ou senha/.test(texto)) {
-    return "As credenciais da API Gera foram recusadas. Peça o reset da senha do integrador HML.";
+    const ambiente = BASE_URL.includes("hml") ? "HML" : "produção";
+    return `As credenciais da API Gera foram recusadas. Peça o reset da senha do integrador de ${ambiente}.`;
   }
   if (/invalid_client/.test(texto)) {
     return "O client da API Gera foi recusado. Confira o clientId e o clientSecret.";
