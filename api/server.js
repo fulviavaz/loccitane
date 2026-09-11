@@ -863,6 +863,22 @@ const origemPublica = (req) => {
   return "";
 };
 
+const hostWebhookDinamize = () => {
+  try {
+    return new URL(DINAMIZE_WEBHOOK_URL).host;
+  } catch {
+    return "";
+  }
+};
+
+const idWebhookDinamize = () => {
+  try {
+    return String(new URL(DINAMIZE_WEBHOOK_URL).pathname.split("/").filter(Boolean)[0] || "").slice(0, 8);
+  } catch {
+    return "";
+  }
+};
+
 const enviarAcessoDinamize = async ({ nome, email, senha, codigo, assetBase }) => {
   if (!dinamizePronta()) return { ok: false, configurada: false, erro: "DINAMIZE_WEBHOOK_URL ausente no processo." };
   const acesso = montarAcessoEmail({ nome, email, senha, codigo }, assetBase);
@@ -877,11 +893,11 @@ const enviarAcessoDinamize = async ({ nome, email, senha, codigo, assetBase }) =
         body: JSON.stringify(payloadWebhookDinamize(acesso))
       });
       const corpo = await lerJsonSeguro(resposta);
-      if (resposta.ok || resposta.status === 202 || resposta.status === 204) ok = true;
-      else {
-        erro = `webhook ${resposta.status} ${extrairMensagem(corpo)}`.trim().slice(0, 180);
-        console.warn("[dinamize] webhook", erro);
-      }
+      const detalhe = `webhook ${resposta.status} ${extrairMensagem(corpo)}`.trim().slice(0, 180);
+      const html = /<!doctype html|<html/i.test(String(corpo.message || ""));
+      console.warn("[dinamize]", detalhe || `webhook ${resposta.status}`);
+      if ((resposta.ok || resposta.status === 202 || resposta.status === 204) && !html) ok = true;
+      else erro = detalhe || `webhook ${resposta.status}`;
     } catch (falha) {
       erro = `webhook erro ${falha.message}`.slice(0, 180);
       console.warn("[dinamize]", erro);
@@ -1036,6 +1052,8 @@ app.get("/api/health", (_req, res) => {
     geraTokenPath: TOKEN_PATH,
     indicoConfigurada: Boolean(INDICO_API_BASE && INDICO_DB_ID),
     dinamizeConfigurada: dinamizePronta(),
+    dinamizeWebhookHost: hostWebhookDinamize(),
+    dinamizeWebhookId: idWebhookDinamize(),
     recaptcha: Boolean(RECAPTCHA_SITE_KEY)
   });
 });
@@ -1346,6 +1364,8 @@ app.post("/api/cadastro", async (req, res) => {
       senhaDefinida,
       emailEnviado,
       emailErro,
+      dinamizeWebhookHost: hostWebhookDinamize(),
+      dinamizeWebhookId: idWebhookDinamize(),
       escritorioUrl: ESCRITORIO_URL,
       message
     });
