@@ -2009,6 +2009,28 @@
     document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
     const form = document.getElementById("lead-form");
+    const eventosGa = new Set();
+    const ehPreview = new URLSearchParams(window.location.search).has("preview");
+    const rastrear = (nome, params = {}) => {
+      if (ehPreview || typeof gtag !== "function") return;
+      gtag("event", nome, params);
+    };
+    const rastrearUmaVez = (nome, params = {}) => {
+      if (eventosGa.has(nome)) return;
+      eventosGa.add(nome);
+      rastrear(nome, params);
+    };
+    const marcarFormularioIniciado = () => rastrearUmaVez("form_start", { form_id: "cadastro_revendedora" });
+    form.addEventListener("input", marcarFormularioIniciado);
+    form.addEventListener("change", marcarFormularioIniciado);
+    window.addEventListener("pagehide", () => {
+      if (!eventosGa.has("form_start") || eventosGa.has("form_complete") || eventosGa.has("form_already_registered")) return;
+      rastrear("form_abandon", {
+        form_id: "cadastro_revendedora",
+        form_step: form.dataset.step || "dados",
+        transport_type: "beacon"
+      });
+    });
     const cpfInput = document.getElementById("lead-cpf");
     const emailInput = document.getElementById("lead-email");
     const emailConfirmaInput = document.getElementById("lead-email-confirma");
@@ -2385,6 +2407,7 @@
     };
 
     const mostrarExistente = (mensagem, campos) => {
+      rastrearUmaVez("form_already_registered", { form_id: "cadastro_revendedora" });
       cadastroJaExiste = true;
       marcarCamposExistentes(campos);
       const aviso = document.getElementById("lead-existe-aviso");
@@ -2453,6 +2476,7 @@
         titulo: "Confirme seu e-mail",
         intro: `Enviamos um código de 6 dígitos para ${payloadAtual.email}.`
       });
+      rastrearUmaVez("form_otp_sent", { form_id: "cadastro_revendedora" });
       mostrarDevCode(devCode);
       mostrarStatus("success", mensagem || "Código enviado. Confira sua caixa de entrada.");
       otpInput.value = "";
@@ -2493,6 +2517,8 @@
           ? "O cadastro foi criado, mas a senha ainda não entrou no Escritório Virtual. Use Esqueci senha com este e-mail."
           : "O usuário é o e-mail. Enviamos a mesma senha para esta caixa de entrada.";
       }
+      rastrearUmaVez("form_complete", { form_id: "cadastro_revendedora" });
+      rastrear("generate_lead", { form_id: "cadastro_revendedora", currency: "BRL" });
       aplicarEscritorioUrl();
       irParaPasso("sucesso", {
         titulo: "Cadastro concluído",
@@ -2529,6 +2555,7 @@
       }
 
       payloadAtual = montarPayload();
+      rastrear("form_submit", { form_id: "cadastro_revendedora" });
       submitBtn.disabled = true;
       submitBtn.textContent = "Consultando cadastro...";
 
