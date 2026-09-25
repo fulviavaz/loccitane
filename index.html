@@ -10,8 +10,77 @@
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-MXZ98BC3JS');
+    gtag("js", new Date());
+    window.__lpCampanha = (function () {
+      const limpar = (valor) => String(valor || "").trim().toLowerCase().replace(/\s+/g, "_");
+      const mediums = { bannner: "banner", baner: "banner", cpc: "cpc", ppc: "cpc" };
+      const params = new URLSearchParams(location.search);
+      const daUrl = {
+        source: limpar(params.get("utm_source")),
+        medium: mediums[limpar(params.get("utm_medium"))] || limpar(params.get("utm_medium")),
+        campaign: limpar(params.get("utm_campaign")),
+        term: limpar(params.get("utm_term")),
+        content: limpar(params.get("utm_content")),
+        id: limpar(params.get("utm_id"))
+      };
+      const tem = (campanha) => Boolean(campanha && (campanha.source || campanha.medium || campanha.campaign));
+      let salvo = null;
+      try { salvo = JSON.parse(sessionStorage.getItem("lp_campanha") || "null"); } catch { salvo = null; }
+      const pago = params.get("gclid") || params.get("gbraid") || params.get("wbraid") || params.get("fbclid");
+      const inferir = () => {
+        if (pago) return {};
+        let host = "";
+        try { host = new URL(document.referrer).hostname.replace(/^www\./, ""); } catch { host = ""; }
+        if (!host || /loccitaneaubresil\.com$/.test(host)) return {};
+        if (/instagram|l\.instagram/.test(host)) return { source: "instagram", medium: "social" };
+        if (/facebook|fb\.com|l\.facebook/.test(host)) return { source: "facebook", medium: "social" };
+        if (/tiktok/.test(host)) return { source: "tiktok", medium: "social" };
+        if (/whatsapp|wa\.me/.test(host)) return { source: "whatsapp", medium: "social" };
+        if (/chatgpt|openai\.com/.test(host)) return { source: "chatgpt", medium: "referral" };
+        return {};
+      };
+      const campanha = tem(daUrl) ? daUrl : (tem(salvo) ? salvo : inferir());
+      if (tem(campanha)) {
+        try { sessionStorage.setItem("lp_campanha", JSON.stringify(campanha)); } catch {}
+      }
+      const bruto = (nome) => String(params.get(nome) || "").trim();
+      const origemGeraUrl = {
+        detail: bruto("utm_source"),
+        medium: bruto("utm_medium"),
+        campaign: bruto("utm_campaign")
+      };
+      let origemGeraSalva = null;
+      try { origemGeraSalva = JSON.parse(sessionStorage.getItem("lp_origem_gera") || "null"); } catch { origemGeraSalva = null; }
+      const temOrigem = (origem) => Boolean(origem && (origem.detail || origem.medium || origem.campaign));
+      const inferida = inferir();
+      const origemGera = temOrigem(origemGeraUrl)
+        ? origemGeraUrl
+        : (temOrigem(origemGeraSalva)
+          ? origemGeraSalva
+          : { detail: inferida.source || "", medium: inferida.medium || "", campaign: "" });
+      if (temOrigem(origemGera)) {
+        try { sessionStorage.setItem("lp_origem_gera", JSON.stringify(origemGera)); } catch {}
+      }
+      window.__lpOrigemGera = origemGera;
+      return campanha;
+    })();
+    const campanhaGa = window.__lpCampanha || {};
+    const configGa = {};
+    if (campanhaGa.source) configGa.campaign_source = campanhaGa.source;
+    if (campanhaGa.medium) configGa.campaign_medium = campanhaGa.medium;
+    if (campanhaGa.campaign) configGa.campaign_name = campanhaGa.campaign;
+    if (campanhaGa.term) configGa.campaign_term = campanhaGa.term;
+    if (campanhaGa.content) configGa.campaign_content = campanhaGa.content;
+    if (campanhaGa.id) configGa.campaign_id = campanhaGa.id;
+    gtag("config", "G-MXZ98BC3JS", configGa);
+    window.dataLayer.push({
+      event: "lp_ready",
+      page_type: "landing_cadastro",
+      page_name: "revenda_loccitane",
+      campaign_source: campanhaGa.source || "",
+      campaign_medium: campanhaGa.medium || "",
+      campaign_name: campanhaGa.campaign || ""
+    });
   </script>
   <link rel="preload" href="assets/fonts/ernest-emily.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/josefin-sans.woff2" as="font" type="font/woff2" crossorigin />
@@ -1971,7 +2040,7 @@
       </div>
     </section>
 
-    <section class="final">
+    <section class="final" id="final">
       <div class="wrap reveal">
         <h2 class="script">Comece a vender hoje</h2>
         <p>Cadastro de graça, pagamento em até 10x e renda extra já na primeira venda.</p>
@@ -2011,9 +2080,31 @@
     const form = document.getElementById("lead-form");
     const eventosGa = new Set();
     const ehPreview = new URLSearchParams(window.location.search).has("preview");
+    const campanhaAtual = window.__lpCampanha || {};
+    const paramsCampanha = () => ({
+      ...(campanhaAtual.source ? { campaign_source: campanhaAtual.source } : {}),
+      ...(campanhaAtual.medium ? { campaign_medium: campanhaAtual.medium } : {}),
+      ...(campanhaAtual.campaign ? { campaign_name: campanhaAtual.campaign } : {}),
+      ...(campanhaAtual.content ? { campaign_content: campanhaAtual.content } : {})
+    });
     const rastrear = (nome, params = {}) => {
-      if (ehPreview || typeof gtag !== "function") return;
-      gtag("event", nome, params);
+      if (ehPreview) return;
+      const { transport_type, ...publicos } = params;
+      const dados = {
+        event: nome,
+        page_type: "landing_cadastro",
+        ...paramsCampanha(),
+        ...publicos
+      };
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push(dados);
+      if (typeof gtag === "function") {
+        gtag("event", nome, {
+          ...paramsCampanha(),
+          ...publicos,
+          ...(transport_type ? { transport_type } : {})
+        });
+      }
     };
     const rastrearUmaVez = (nome, params = {}) => {
       if (eventosGa.has(nome)) return;
@@ -2296,6 +2387,7 @@
       form.dataset.step = passo;
       if (titulo) titleEl.textContent = titulo;
       if (intro) introEl.textContent = intro;
+      rastrear("form_step", { form_id: "cadastro_revendedora", form_step: passo });
     };
 
     const montarPayload = () => {
@@ -2319,7 +2411,10 @@
         uf: ufInput.value.trim().toUpperCase(),
         acceptTerms: termosInput.checked,
         allowsRegisterDivulgation: divulgacaoInput.checked,
-        acceptsMessages: informativosInput.checked
+        acceptsMessages: informativosInput.checked,
+        registrationOriginDetail: (window.__lpOrigemGera && window.__lpOrigemGera.detail) || "",
+        registrationOriginMedium: (window.__lpOrigemGera && window.__lpOrigemGera.medium) || "",
+        registrationOriginCampaign: (window.__lpOrigemGera && window.__lpOrigemGera.campaign) || ""
       };
     };
 
@@ -2617,17 +2712,17 @@
         }
         validarOtpBtn.textContent = "Salvando seus dados...";
         const captchaLead = await obterCaptcha("lead");
-        const utm = new URLSearchParams(window.location.search);
+        const utmUrl = new URLSearchParams(window.location.search);
         const lead = await chamarApi("/api/lead", {
           ...payloadAtual,
           captcha_token: captchaLead,
           landing_page_url: window.location.href,
           referrer: document.referrer || "",
-          utm_source: utm.get("utm_source") || "",
-          utm_medium: utm.get("utm_medium") || "",
-          utm_campaign: utm.get("utm_campaign") || "",
-          utm_term: utm.get("utm_term") || "",
-          utm_content: utm.get("utm_content") || ""
+          utm_source: campanhaAtual.source || utmUrl.get("utm_source") || "",
+          utm_medium: campanhaAtual.medium || utmUrl.get("utm_medium") || "",
+          utm_campaign: campanhaAtual.campaign || utmUrl.get("utm_campaign") || "",
+          utm_term: campanhaAtual.term || utmUrl.get("utm_term") || "",
+          utm_content: campanhaAtual.content || utmUrl.get("utm_content") || ""
         });
         if (!lead.resposta.ok || !lead.data.ok) {
           throw new Error(lead.data.message || "Não foi possível gravar o lead.");
@@ -2801,10 +2896,58 @@
     });
 
     definirValor(PEDIDO_MIN);
+    const marcarCalc = () => rastrearUmaVez("calc_interact", { component: "calculadora" });
+    calcInput.addEventListener("input", marcarCalc);
+    calcRange.addEventListener("input", marcarCalc);
+    calcChips.forEach((chip) => chip.addEventListener("click", marcarCalc));
+
+    const secoesVistas = new Set();
+    const verSecao = new IntersectionObserver((entradas) => {
+      entradas.forEach((entrada) => {
+        const id = entrada.target.id;
+        if (!entrada.isIntersecting || !id || secoesVistas.has(id)) return;
+        secoesVistas.add(id);
+        rastrear("section_view", { section_id: id, section_name: id });
+      });
+    }, { threshold: 0.45 });
+    ["topo", "calculadora", "cadastro", "passos", "crescimento", "produtos", "depoimentos", "duvidas", "final"]
+      .forEach((id) => {
+        const bloco = document.getElementById(id);
+        if (bloco) verSecao.observe(bloco);
+      });
+
+    document.querySelectorAll("#duvidas details").forEach((item) => {
+      item.addEventListener("toggle", () => {
+        if (!item.open) return;
+        rastrear("faq_open", {
+          component: "faq",
+          faq_question: (item.querySelector("summary")?.textContent || "").trim().slice(0, 80)
+        });
+      });
+    });
 
     document.querySelectorAll('a[href="#cadastro"]').forEach((link) => {
       link.addEventListener("click", () => {
+        const local = link.classList.contains("sticky-cta") ? "sticky"
+          : link.closest("header") ? "header"
+          : link.closest(".hero") ? "hero"
+          : link.closest("footer") ? "footer"
+          : "conteudo";
+        rastrear("cta_click", {
+          link_text: (link.textContent || "").trim().slice(0, 80),
+          link_location: local
+        });
         window.setTimeout(() => form.querySelector("input")?.focus({ preventScroll: true }), 700);
+      });
+    });
+    document.querySelectorAll('a[href*="wa.me"]').forEach((link) => {
+      link.addEventListener("click", () => {
+        rastrear("click_whatsapp", { outbound: true, link_url: link.href });
+      });
+    });
+    document.querySelectorAll("a.js-escritorio").forEach((link) => {
+      link.addEventListener("click", () => {
+        rastrear("click_escritorio", { outbound: true, link_url: link.href });
       });
     });
   </script>

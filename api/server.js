@@ -192,7 +192,10 @@ const validarPayload = (body) => {
       uf,
       acceptTerms,
       allowsRegisterDivulgation,
-      acceptsMessages
+      acceptsMessages,
+      registrationOriginDetail: String(body.registrationOriginDetail || body.utm_source || "").trim(),
+      registrationOriginMedium: String(body.registrationOriginMedium || body.utm_medium || "").trim(),
+      registrationOriginCampaign: String(body.registrationOriginCampaign || body.utm_campaign || "").trim()
     }
   };
 };
@@ -321,6 +324,9 @@ const cadastrarRevendedor = async (token, dados, geographicStructureCode) => {
   campos.addressReference = dados.referencia;
   if (geographicStructureCode) campos.geographicStructureCode = geographicStructureCode;
   if (REGISTRATION_ORIGIN) campos.registrationOrigin = REGISTRATION_ORIGIN;
+  if (dados.registrationOriginDetail) campos.registrationOriginDetail = dados.registrationOriginDetail;
+  if (dados.registrationOriginMedium) campos.registrationOriginMedium = dados.registrationOriginMedium;
+  if (dados.registrationOriginCampaign) campos.registrationOriginCampaign = dados.registrationOriginCampaign;
 
   const resposta = await fetch(joinUrl(BASE_URL, SELLERS_PATH), {
     method: "POST",
