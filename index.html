@@ -2412,9 +2412,23 @@
         acceptTerms: termosInput.checked,
         allowsRegisterDivulgation: divulgacaoInput.checked,
         acceptsMessages: informativosInput.checked,
-        registrationOriginDetail: (window.__lpOrigemGera && window.__lpOrigemGera.detail) || "",
-        registrationOriginMedium: (window.__lpOrigemGera && window.__lpOrigemGera.medium) || "",
-        registrationOriginCampaign: (window.__lpOrigemGera && window.__lpOrigemGera.campaign) || ""
+        ...(() => {
+          const params = new URLSearchParams(window.location.search);
+          const daUrl = {
+            registrationOriginDetail: String(params.get("utm_source") || "").trim(),
+            registrationOriginMedium: String(params.get("utm_medium") || "").trim(),
+            registrationOriginCampaign: String(params.get("utm_campaign") || "").trim()
+          };
+          if (daUrl.registrationOriginDetail || daUrl.registrationOriginMedium || daUrl.registrationOriginCampaign) {
+            return daUrl;
+          }
+          const salvo = window.__lpOrigemGera || {};
+          return {
+            registrationOriginDetail: salvo.detail || "",
+            registrationOriginMedium: salvo.medium || "",
+            registrationOriginCampaign: salvo.campaign || ""
+          };
+        })()
       };
     };
 

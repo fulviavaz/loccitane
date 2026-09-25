@@ -200,6 +200,32 @@ const validarPayload = (body) => {
   };
 };
 
+const origemDaUrl = (valor) => {
+  try {
+    const url = new URL(String(valor || ""));
+    return {
+      detail: String(url.searchParams.get("utm_source") || "").trim(),
+      medium: String(url.searchParams.get("utm_medium") || "").trim(),
+      campaign: String(url.searchParams.get("utm_campaign") || "").trim()
+    };
+  } catch {
+    return { detail: "", medium: "", campaign: "" };
+  }
+};
+
+const completarOrigemCadastro = (dados, req) => {
+  if (dados.registrationOriginDetail || dados.registrationOriginMedium || dados.registrationOriginCampaign) {
+    return dados;
+  }
+  const doReferer = origemDaUrl(req?.get?.("referer") || req?.get?.("referrer") || "");
+  return {
+    ...dados,
+    registrationOriginDetail: doReferer.detail,
+    registrationOriginMedium: doReferer.medium,
+    registrationOriginCampaign: doReferer.campaign
+  };
+};
+
 const obterToken = async () => {
   if (tokenCache.token && Date.now() < tokenCache.expiresAt - 30_000) {
     return tokenCache.token;
@@ -1291,9 +1317,16 @@ app.post("/api/cadastro", async (req, res) => {
       geographicStructureCode = "";
     }
 
+    const dadosCadastro = completarOrigemCadastro(validacao.dados, req);
+    console.log(
+      "[cadastro] origem",
+      dadosCadastro.registrationOriginDetail || "-",
+      dadosCadastro.registrationOriginMedium || "-",
+      (dadosCadastro.registrationOriginCampaign || "-").slice(0, 80)
+    );
     const { resposta, corpo } = await cadastrarRevendedor(
       token,
-      validacao.dados,
+      dadosCadastro,
       geographicStructureCode
     );
     if (!resposta.ok) {
@@ -1373,6 +1406,11 @@ app.post("/api/cadastro", async (req, res) => {
       dinamizeWebhookHost: hostWebhookDinamize(),
       dinamizeWebhookId: idWebhookDinamize(),
       escritorioUrl: ESCRITORIO_URL,
+      origem: {
+        detail: dadosCadastro.registrationOriginDetail || "",
+        medium: dadosCadastro.registrationOriginMedium || "",
+        campaign: dadosCadastro.registrationOriginCampaign || ""
+      },
       message
     });
   } catch (erro) {
