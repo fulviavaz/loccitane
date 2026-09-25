@@ -213,16 +213,25 @@ const origemDaUrl = (valor) => {
   }
 };
 
+const origemPadraoSite = () => ({
+  detail: "Site",
+  medium: "direct",
+  campaign: "lp-sem-parametro"
+});
+
 const completarOrigemCadastro = (dados, req) => {
   if (dados.registrationOriginDetail || dados.registrationOriginMedium || dados.registrationOriginCampaign) {
     return dados;
   }
   const doReferer = origemDaUrl(req?.get?.("referer") || req?.get?.("referrer") || "");
+  const origem = (doReferer.detail || doReferer.medium || doReferer.campaign)
+    ? doReferer
+    : origemPadraoSite();
   return {
     ...dados,
-    registrationOriginDetail: doReferer.detail,
-    registrationOriginMedium: doReferer.medium,
-    registrationOriginCampaign: doReferer.campaign
+    registrationOriginDetail: origem.detail,
+    registrationOriginMedium: origem.medium,
+    registrationOriginCampaign: origem.campaign
   };
 };
 
