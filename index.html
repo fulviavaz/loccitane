@@ -14,31 +14,58 @@
     window.__lpCampanha = (function () {
       const limpar = (valor) => String(valor || "").trim().toLowerCase().replace(/\s+/g, "_");
       const mediums = { bannner: "banner", baner: "banner", cpc: "cpc", ppc: "cpc" };
+      const rotulosSource = {
+        indico: "Indico",
+        vaeverdb: "Vaeverdb",
+        google: "Google",
+        facebook: "Facebook",
+        instagram: "Instagram",
+        tiktok: "TikTok",
+        whatsapp: "WhatsApp",
+        chatgpt: "ChatGPT",
+        "chatgpt.com": "ChatGPT"
+      };
+      const ehRuido = (host) => /office\.net|office365|officeapps|onedrive|sharepoint|outlook|teams\.|static\.microsoft|microsoftonline|live\.com|googleusercontent|gstatic\.com|cloudflare|cdn\./.test(host || "");
+      const rotular = (campanha) => {
+        if (!campanha) return {};
+        const sourceBruto = limpar(campanha.source);
+        if (!sourceBruto || ehRuido(sourceBruto)) {
+          return campanha.medium || campanha.campaign ? { ...campanha, source: "" } : {};
+        }
+        const source = rotulosSource[sourceBruto] || (/chatgpt/.test(sourceBruto) ? "ChatGPT" : sourceBruto.includes(".") ? "" : sourceBruto.replace(/^./, (letra) => letra.toUpperCase()));
+        if (!source) return {};
+        return {
+          ...campanha,
+          source,
+          medium: campanha.medium || (source === "Google" ? "organic" : "referral")
+        };
+      };
       const params = new URLSearchParams(location.search);
-      const daUrl = {
+      const daUrl = rotular({
         source: limpar(params.get("utm_source")),
         medium: mediums[limpar(params.get("utm_medium"))] || limpar(params.get("utm_medium")),
         campaign: limpar(params.get("utm_campaign")),
         term: limpar(params.get("utm_term")),
         content: limpar(params.get("utm_content")),
         id: limpar(params.get("utm_id"))
-      };
+      });
       const tem = (campanha) => Boolean(campanha && (campanha.source || campanha.medium || campanha.campaign));
       let salvo = null;
       try { salvo = JSON.parse(sessionStorage.getItem("lp_campanha") || "null"); } catch { salvo = null; }
-      const pago = params.get("gclid") || params.get("gbraid") || params.get("wbraid") || params.get("fbclid");
       const inferir = () => {
-        if (pago) return { source: "google", medium: "cpc" };
+        if (params.get("gclid") || params.get("gbraid") || params.get("wbraid")) return { source: "Google", medium: "cpc" };
+        if (params.get("fbclid")) return { source: "Facebook", medium: "cpc" };
         let host = "";
         try { host = new URL(document.referrer).hostname.replace(/^www\./, ""); } catch { host = ""; }
-        if (!host || /loccitaneaubresil\.com$|run\.app$/.test(host)) return {};
-        if (/google\./.test(host)) return { source: "google", medium: "organic" };
-        if (/instagram|l\.instagram/.test(host)) return { source: "instagram", medium: "social" };
-        if (/facebook|fb\.com|l\.facebook/.test(host)) return { source: "facebook", medium: "social" };
-        if (/tiktok/.test(host)) return { source: "tiktok", medium: "social" };
-        if (/whatsapp|wa\.me/.test(host)) return { source: "whatsapp", medium: "social" };
-        if (/chatgpt|openai\.com/.test(host)) return { source: "chatgpt", medium: "referral" };
-        return { source: host, medium: "referral" };
+        if (!host || ehRuido(host) || /loccitaneaubresil\.com$|run\.app$/.test(host)) return {};
+        if (/google\./.test(host)) return { source: "Google", medium: "organic" };
+        if (/instagram|l\.instagram/.test(host)) return { source: "Instagram", medium: "social" };
+        if (/facebook|fb\.com|l\.facebook/.test(host)) return { source: "Facebook", medium: "social" };
+        if (/tiktok/.test(host)) return { source: "TikTok", medium: "social" };
+        if (/whatsapp|wa\.me/.test(host)) return { source: "WhatsApp", medium: "social" };
+        if (/chatgpt|openai\.com/.test(host)) return { source: "ChatGPT", medium: "referral" };
+        if (/indico/.test(host)) return { source: "Indico", medium: "referral" };
+        return {};
       };
       const origemGeraPadrao = () => ({ detail: "Site", medium: "direct", campaign: "lp-sem-parametro" });
       const origemGeraInferida = () => {
@@ -47,20 +74,19 @@
         }
         if (params.get("fbclid")) return { detail: "Facebook", medium: "CPC", campaign: "facebook-ads" };
         const inferida = inferir();
-        if (inferida.source === "google" && inferida.medium === "organic") {
+        if (inferida.source === "Google" && inferida.medium === "organic") {
           return { detail: "Google", medium: "organic", campaign: "lp-organica" };
         }
         if (inferida.source) {
-          const nomes = { instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok", whatsapp: "WhatsApp", chatgpt: "ChatGPT" };
           return {
-            detail: nomes[inferida.source] || inferida.source,
+            detail: inferida.source,
             medium: inferida.medium || "referral",
             campaign: "lp-referrer"
           };
         }
         return origemGeraPadrao();
       };
-      const campanha = tem(daUrl) ? daUrl : (tem(salvo) ? salvo : inferir());
+      const campanha = rotular(tem(daUrl) ? daUrl : (tem(salvo) ? salvo : inferir()));
       if (tem(campanha)) {
         try { sessionStorage.setItem("lp_campanha", JSON.stringify(campanha)); } catch {}
       }
@@ -90,6 +116,11 @@
     if (campanhaGa.term) configGa.campaign_term = campanhaGa.term;
     if (campanhaGa.content) configGa.campaign_content = campanhaGa.content;
     if (campanhaGa.id) configGa.campaign_id = campanhaGa.id;
+    try {
+      if (/office\.net|office365|teams\.|static\.microsoft|sharepoint|outlook/.test(new URL(document.referrer).hostname)) {
+        configGa.ignore_referrer = true;
+      }
+    } catch {}
     gtag("config", "G-MXZ98BC3JS", configGa);
     window.dataLayer.push({
       event: "lp_ready",
