@@ -2085,7 +2085,7 @@
       </a>
       <div class="footer__links">
         <a href="#cadastro">Cadastro</a>
-        <a href="https://revendedor.loccitaneaubresil.com/" target="_blank" rel="noopener">Site de pedidos</a>
+        <a class="js-escritorio" href="https://revendedor.loccitaneaubresil.com/" target="_blank" rel="noopener">Site de pedidos</a>
         <a href="https://wa.me/5511975743863" target="_blank" rel="noopener">WhatsApp</a>
         <a href="https://www.instagram.com/loccitaneaubresil/" target="_blank" rel="noopener">Instagram</a>
       </div>
@@ -2169,6 +2169,12 @@
     const informativosInput = document.getElementById("lead-informativos");
     document.querySelector(".form__termos-link")?.addEventListener("click", (event) => {
       event.stopPropagation();
+      rastrear("click_termos", {
+        outbound: true,
+        link_text: "termos do programa",
+        link_url: event.currentTarget.href,
+        link_location: "formulario"
+      });
     });
     const submitBtn = document.getElementById("lead-submit");
     const statusBox = document.getElementById("lead-status");
@@ -2736,6 +2742,7 @@
 
     validarOtpBtn.addEventListener("click", async () => {
       if (!payloadAtual) return;
+      rastrear("click_otp", { otp_action: "confirm", link_text: "Confirmar código", link_location: "formulario" });
       limparStatus();
       if (soDigitos(otpInput.value).length !== 6) {
         mostrarStatus("error", "Digite o código de 6 dígitos enviado por e-mail.");
@@ -2789,6 +2796,11 @@
         if (!texto || texto === "—") return;
         try {
           await navigator.clipboard.writeText(texto);
+          rastrear("click_copy", {
+            copy_field: botao.dataset.copy || "",
+            link_text: "Copiar",
+            link_location: "formulario"
+          });
           const original = botao.textContent;
           botao.textContent = "Copiado";
           window.setTimeout(() => {
@@ -2802,6 +2814,7 @@
 
     reenviarOtpBtn.addEventListener("click", async () => {
       if (!payloadAtual) return;
+      rastrear("click_otp", { otp_action: "resend", link_text: "Reenviar código", link_location: "formulario" });
       limparStatus();
       reenviarOtpBtn.disabled = true;
       try {
@@ -2815,7 +2828,12 @@
       }
     });
 
-    const voltarAoFormulario = () => {
+    const voltarAoFormulario = (event) => {
+      rastrear("click_form_back", {
+        link_text: (event?.currentTarget?.textContent || "Voltar ao formulário").trim(),
+        form_step: form.dataset.step || "",
+        link_location: "formulario"
+      });
       limparStatus();
       irParaPasso("dados", {
         titulo: "Cadastro grátis",
@@ -2969,28 +2987,68 @@
       });
     });
 
+    const textoDoClique = (el) => (el.getAttribute("aria-label") || el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 80);
+    const localDoClique = (el) => {
+      if (el.id === "sticky-cta" || el.classList.contains("sticky-cta")) return "sticky";
+      if (el.closest("header")) return "header";
+      if (el.closest(".hero")) return "hero";
+      if (el.closest("#calculadora")) return "calculadora";
+      if (el.closest("#cadastro") || el.closest(".form")) return "formulario";
+      if (el.closest("#produtos")) return "produtos";
+      if (el.closest("#final")) return "final";
+      if (el.closest("#duvidas")) return "faq";
+      if (el.closest("footer")) return "footer";
+      return "conteudo";
+    };
+
     document.querySelectorAll('a[href="#cadastro"]').forEach((link) => {
       link.addEventListener("click", () => {
-        const local = link.classList.contains("sticky-cta") ? "sticky"
-          : link.closest("header") ? "header"
-          : link.closest(".hero") ? "hero"
-          : link.closest("footer") ? "footer"
-          : "conteudo";
         rastrear("cta_click", {
-          link_text: (link.textContent || "").trim().slice(0, 80),
-          link_location: local
+          link_text: textoDoClique(link),
+          link_url: "#cadastro",
+          link_location: localDoClique(link)
         });
         window.setTimeout(() => form.querySelector("input")?.focus({ preventScroll: true }), 700);
       });
     });
+    document.querySelectorAll(".header__nav a, .header__logo, .footer__logo").forEach((link) => {
+      if (link.getAttribute("href") === "#cadastro") return;
+      link.addEventListener("click", () => {
+        rastrear("click_nav", {
+          link_text: textoDoClique(link),
+          link_url: link.getAttribute("href") || "",
+          link_location: localDoClique(link)
+        });
+      });
+    });
     document.querySelectorAll('a[href*="wa.me"]').forEach((link) => {
       link.addEventListener("click", () => {
-        rastrear("click_whatsapp", { outbound: true, link_url: link.href });
+        rastrear("click_whatsapp", {
+          outbound: true,
+          link_text: textoDoClique(link),
+          link_url: link.href,
+          link_location: localDoClique(link)
+        });
       });
     });
     document.querySelectorAll("a.js-escritorio").forEach((link) => {
       link.addEventListener("click", () => {
-        rastrear("click_escritorio", { outbound: true, link_url: link.href });
+        rastrear("click_escritorio", {
+          outbound: true,
+          link_text: textoDoClique(link),
+          link_url: link.href,
+          link_location: localDoClique(link)
+        });
+      });
+    });
+    document.querySelectorAll('a[href*="instagram.com"]').forEach((link) => {
+      link.addEventListener("click", () => {
+        rastrear("click_instagram", {
+          outbound: true,
+          link_text: textoDoClique(link),
+          link_url: link.href,
+          link_location: localDoClique(link)
+        });
       });
     });
   </script>
